@@ -1,0 +1,42 @@
+baseURL = "http://localhost:1313/"
+title = "Internship Report - Tran Xuan Duc"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = true
+# VI/EN nam chung thu muc content; _index.md = EN, _index.vi.md = VI
+relativeURLs = false
+canonifyURLs = false
+summaryLength = 40
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
+[params]
+  # PHAN CUOI MENU: doi gia tri o day de trang hien ten nhom va ngay cap nhat
+  team = "First Cloud AI Journey"
+  teamURL = "https://www.facebook.com/groups/660548818043427"
+  lastUpdated = "18-11-2026"
+  # Anh chan dung tren trang chu; thay file trong static/images neu muon doi anh
+  profilePhoto = "images/tran-xuan-duc.jpg"
+
+  # LINKS CA NHAN: de trong cho den khi ban co dia chi that
+  githubRepo = ""
+  projectDemo = ""
+  videoDemo = ""
+  topic = "Xây dựng hệ thống quản lý và giám sát hạ tầng mạng doanh nghiệp vừa và nhỏ trên AWS tích hợp dịch vụ Serverless"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[languages]
+  [languages.vi]
+    title = "Báo cáo thực tập - Tran Xuan Duc"
+    languageCode = "vi-VN"
+    label = "Tiếng Việt"
+    weight = 1
+  [languages.en]
+    title = "Internship Report - Tran Xuan Duc"
+    languageCode = "en-US"
+    label = "English"
+    weight = 2

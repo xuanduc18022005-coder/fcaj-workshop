@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Hugo: xem truoc website",
+      "type": "shell",
+      "command": "hugo",
+      "args": [
+        "server",
+        "-D"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Hugo: build website",
+      "type": "shell",
+      "command": "hugo",
+      "args": [
+        "--minify"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

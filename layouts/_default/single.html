@@ -1,0 +1,6 @@
+{{ define "main" }}
+<article class="article inner-article{{ if in .RelPermalink "/1-worklog/" }} worklog-article{{ end }}">
+  <h1 class="section-heading">{{ replaceRE "^[0-9]+([.][0-9]+)*[.] *" "" .Title }}</h1>
+  <div class="markdown-body">{{ .Content }}</div>
+</article>
+{{ end }}

@@ -1,0 +1,18 @@
+{{- $node := .node -}}
+{{- $current := .current -}}
+{{- $level := .level -}}
+{{- $active := eq $node.RelPermalink $current.RelPermalink -}}
+{{- $ancestor := and $node.IsSection ($node.IsAncestor $current) -}}
+{{- $hasChildren := and $node.IsSection (gt (len $node.Pages) 0) -}}
+<li class="nav-item{{ if $active }} selected{{ end }}{{ if $ancestor }} ancestor{{ end }}" data-depth="{{ $level }}">
+  <div class="nav-line">
+    <a class="nav-link{{ if $active }} is-active{{ end }}" href="{{ $node.RelPermalink }}" {{ if $active }}aria-current="page"{{ end }}>{{ $node.Title }}</a>
+  </div>
+  {{- if and $hasChildren (or $ancestor $active) -}}
+  <ul class="nav-tree nav-nested">
+    {{- range $node.Pages.ByWeight -}}
+      {{ partial "nav-item.html" (dict "node" . "current" $current "level" (add $level 1)) }}
+    {{- end -}}
+  </ul>
+  {{- end -}}
+</li>

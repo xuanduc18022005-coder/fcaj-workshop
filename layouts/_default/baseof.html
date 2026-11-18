@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="{{ .Site.Language.Lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{ .Site.Title }} - AWS FCJ">
+  <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} :: {{ .Site.Title }}{{ end }}</title>
+  <link rel="icon" href="{{ "images/favicon.svg" | relURL }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
+</head>
+<body class="{{ if .IsHome }}page-home{{ else }}page-inner{{ end }}">
+  {{ partial "sidebar.html" . }}
+  <div class="layout-main">
+    <header class="topbar">
+      <button type="button" class="mobile-toggle" aria-label="Mở menu" aria-expanded="false">☰</button>
+      {{ if not .IsHome }}
+      <div class="breadcrumbs">
+        {{ $toc := .TableOfContents }}
+        {{ if findRE "<li>" $toc }}
+        <details class="breadcrumb-toc">
+          <summary class="breadcrumb-icon" title="{{ if eq .Language.Lang "vi" }}Mục lục bài viết{{ else }}On this page{{ end }}" aria-label="{{ if eq .Language.Lang "vi" }}Mục lục bài viết{{ else }}On this page{{ end }}"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="3" width="20" height="18" rx="2" fill="currentColor"/><path d="M6 7h2m-2 5h2m-2 5h2m3-10h7m-7 5h7m-7 5h7" stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg></summary>
+          <div class="breadcrumb-toc-panel">{{ $toc }}</div>
+        </details>
+        {{ else }}<span class="breadcrumb-icon breadcrumb-static" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><rect x="2" y="3" width="20" height="18" rx="2" fill="currentColor"/><path d="M6 7h2m-2 5h2m-2 5h2m3-10h7m-7 5h7m-7 5h7" stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg></span>{{ end }}
+        {{ range .Ancestors.Reverse }}<a href="{{ .RelPermalink }}">{{ if .IsHome }}{{ if eq $.Language.Lang "vi" }}Báo cáo thực tập{{ else }}Internship Report{{ end }}{{ else }}{{ replaceRE "^[0-9]+([.][0-9]+)*[.] *" "" .Title }}{{ end }}</a><span class="breadcrumb-sep">&gt;</span>{{ end }}
+        <span class="breadcrumb-current">{{ replaceRE "^[0-9]+([.][0-9]+)*[.] *" "" .Title }}</span>
+      </div>
+      {{ end }}
+    </header>
+    <main id="content" class="page-content">
+      {{ block "main" . }}{{ end }}
+    </main>
+  </div>
+  <nav hidden id="page-order" aria-hidden="true"><a href="{{ .Site.Home.RelPermalink }}" data-page-title="{{ .Site.Home.Title }}"></a>{{ partial "page-order.html" .Site.Home }}</nav>
+  <nav class="side-page-nav" aria-label="{{ if eq .Language.Lang "vi" }}Chuyển trang{{ else }}Page navigation{{ end }}">
+    <a class="page-arrow page-prev" hidden aria-label="{{ if eq .Language.Lang "vi" }}Trang trước{{ else }}Previous page{{ end }}"><svg viewBox="0 0 28 48" aria-hidden="true"><path d="M23 5 5 24l18 19"/></svg></a>
+    <a class="page-arrow page-next" hidden aria-label="{{ if eq .Language.Lang "vi" }}Trang sau{{ else }}Next page{{ end }}"><svg viewBox="0 0 28 48" aria-hidden="true"><path d="m5 5 18 19L5 43"/></svg></a>
+  </nav>
+  <div class="mobile-shade" aria-hidden="true"></div>
+  <button type="button" id="back-to-top" title="{{ if eq .Language.Lang "vi" }}Lên đầu trang{{ else }}Back to top{{ end }}" aria-label="{{ if eq .Language.Lang "vi" }}Lên đầu trang{{ else }}Back to top{{ end }}">↑</button>
+  <div class="tool-toast" id="tool-toast" role="status" aria-live="polite"></div>
+  <dialog id="image-lightbox" class="image-lightbox" aria-label="{{ if eq .Language.Lang "vi" }}Xem ảnh lớn{{ else }}Image preview{{ end }}">
+    <button type="button" class="lightbox-close" aria-label="Close">×</button><img alt=""><p></p>
+  </dialog>
+  <script defer src="{{ "js/site.js" | relURL }}"></script>
+</body>
+</html>

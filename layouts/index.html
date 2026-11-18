@@ -1,0 +1,17 @@
+{{ define "main" }}
+<article class="article home-article">
+  <h1 class="hero-title">{{ .Title }}</h1>
+  <div class="student-overview">
+    <div class="markdown-body home-markdown">{{ .Content }}</div>
+    <figure class="profile-image">
+      <img src="{{ with .Site.Params.profilephoto }}{{ . | relURL }}{{ else }}{{ "images/profile-placeholder.svg" | relURL }}{{ end }}" alt="{{ if eq .Language.Lang "vi" }}Ảnh chân dung của Tran Xuan Duc{{ else }}Portrait of Tran Xuan Duc{{ end }}" width="680" height="983" loading="eager">
+    </figure>
+  </div>
+  <section class="report-links">
+    <h2>{{ if eq .Language.Lang "vi" }}Nội dung báo cáo{{ else }}Report Content{{ end }}</h2>
+    <div class="report-link-list">{{ range .Site.Home.Sections.ByWeight }}
+      <p><a href="{{ .RelPermalink }}">{{ .Title }}</a></p>{{ end }}
+    </div>
+  </section>
+</article>
+{{ end }}

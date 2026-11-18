@@ -1,0 +1,12 @@
+{{ define "main" }}
+<article class="article inner-article{{ if hasSuffix .RelPermalink "/1-worklog/" }} worklog-index{{ else if in .RelPermalink "/1-worklog/" }} worklog-article{{ end }}">
+  <h1 class="section-heading">{{ replaceRE "^[0-9]+([.][0-9]+)*[.] *" "" .Title }}</h1>
+  <div class="markdown-body">{{ .Content }}</div>
+  {{ if and (gt (len .Pages) 0) (not (hasSuffix .RelPermalink "/1-worklog/")) (not (hasSuffix .RelPermalink "/4-eventparticipated/")) (not (in .RelPermalink "/5-workshop/")) }}
+  <div class="child-list">
+    <h2>{{ if eq .Language.Lang "vi" }}Nội dung{{ else }}Content{{ end }}</h2>
+    <ol>{{ range .Pages.ByWeight }}<li><a href="{{ .RelPermalink }}">{{ replaceRE "^[0-9]+([.][0-9]+)*[.] *" "" .Title }}</a></li>{{ end }}</ol>
+  </div>
+  {{ end }}
+</article>
+{{ end }}

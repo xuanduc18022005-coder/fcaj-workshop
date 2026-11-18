@@ -1,0 +1,4 @@
+<figure class="report-photo">
+<img src="{{ (printf "images/%s" (.Get "src")) | relURL }}" alt="{{ .Get "alt" }}" loading="lazy">
+{{ with .Get "caption" }}<figcaption>{{ . }}</figcaption>{{ end }}
+</figure>
