@@ -4,10 +4,16 @@ weight = 3
 translationKey = "blogs"
 +++
 
-During the internship, I explored AWS technical articles and summarized three topics. Each post includes a flow diagram, a takeaway and sample code for further study.
+This section introduces three technical blog posts I studied and wrote during my internship. Each article explores an AWS solution and includes a flow diagram, the original article, and sample code for further study.
 
-**Blog 1:** [Efficient batch processing with AWS Lambda and Amazon SQS](blog-1/)
+## [Blog 1 - EFFICIENT BATCH PROCESSING WITH AWS LAMBDA AND AMAZON SQS](blog-1/)
 
-**Blog 2:** [Troubleshoot faster with structured logs in Amazon CloudWatch](blog-2/)
+This article introduces how Amazon SQS and AWS Lambda can work together to process messages in batches. It explains parallel processing within a single invocation, partial batch failure handling, and techniques for avoiding duplicate processing. These concepts help improve the efficiency of asynchronous workloads on AWS.
 
-**Blog 3:** [Automate emailed document processing with Amazon Bedrock and SES](blog-3/)
+## [Blog 2 - TROUBLESHOOT FASTER WITH STRUCTURED LOGS IN AMAZON CLOUDWATCH](blog-2/)
+
+This article explores the use of structured JSON logs to monitor applications and investigate incidents. It explains how CloudWatch Logs Insights supports queries, how Embedded Metric Format (EMF) extracts metrics, and how latency and errors can be analyzed by service to narrow down an investigation.
+
+## [Blog 3 - AUTOMATE EMAILED DOCUMENT PROCESSING WITH AMAZON BEDROCK AND SES](blog-3/)
+
+This article introduces an automated approach to receiving and classifying documents sent by email using Amazon SES Mail Manager, AWS Lambda, and Amazon Bedrock. It describes storing attachments in Amazon S3 and tracking processing metadata in DynamoDB, while highlighting security considerations and the need to validate AI-generated results.
