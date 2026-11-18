@@ -16,10 +16,6 @@ This workshop guides the deployment of **NetMon Cloud – a serverless AWS netwo
 - [5.6. Cognito, JWT and frontend](5-6-auth-frontend/)
 - [5.7. End-to-end testing and cleanup](5-7-testing-cleanup/)
 
-## Lab execution order
-
-After 5.1–5.3, create tables and Lambda functions in 5.5.1–5.5.2 before enabling Scheduler/Streams in 5.4.3–5.4.4. Configure metrics/SNS in 5.4.1–5.4.2 independently; create the HTTP API in 5.5.3 and complete Cognito/JWT in 5.6.1–5.6.3. Then test the interface and scenarios, and clean up only when the team approves.
-
 ## NetMon Cloud interface
 
 The major website features are illustrated by function below. Click an image to enlarge it. Twenty-four interface tests use a mock API and session; three previously supplied interface screenshots reflect their capture-time state. These images do not replace verification of AWS resources or live test results.

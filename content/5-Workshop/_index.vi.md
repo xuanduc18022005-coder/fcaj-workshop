@@ -16,10 +16,6 @@ Workshop hướng dẫn triển khai **NetMon Cloud – Hệ thống quản lý 
 - [5.6. Cognito, JWT và giao diện](5-6-auth-frontend/)
 - [5.7. Kiểm thử tổng thể và dọn dẹp tài nguyên](5-7-testing-cleanup/)
 
-## Thứ tự thực hành
-
-Sau 5.1–5.3, tạo bảng và Lambda ở 5.5.1–5.5.2 trước khi bật Scheduler/Streams (5.4.3–5.4.4). Cấu hình metrics/SNS ở 5.4.1–5.4.2 độc lập; tạo HTTP API ở 5.5.3 rồi hoàn tất Cognito/JWT ở 5.6.1–5.6.3. Sau đó kiểm tra giao diện và ca kiểm thử, cuối cùng mới dọn tài nguyên khi nhóm đồng ý.
-
 ## Giao diện hệ thống NetMon Cloud
 
 Các chức năng chính của website được minh họa theo từng nhóm dưới đây. Bấm vào ảnh để xem kích thước lớn. 24 ảnh kiểm thử sử dụng API và phiên đăng nhập giả lập; 3 ảnh giao diện do nhóm cung cấp trước đó phản ánh trạng thái tại thời điểm chụp. Các ảnh không thay thế việc xác nhận tài nguyên AWS hay kết quả kiểm thử trực tiếp.
