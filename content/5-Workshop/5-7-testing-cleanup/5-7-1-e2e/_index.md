@@ -1,50 +1,64 @@
 +++
-title = "5.7.1. End-to-end system testing"
+title = "5.7.1. Test from the UI to CloudWatch/DynamoDB"
 weight = 1
-translationKey = "ws-6-1"
+translationKey = "ws-shared-5-7-1-e2e"
 +++
 
-## Test scenarios
+## Objective
 
-| Step | Expected outcome |
-|---|---|
-| Cognito login | API accepts valid token and scope only |
-| Create, update and delete test device | DynamoDB reflects changes |
-| EC2 | CloudWatch CPU and RAM if agent works |
-| Simulated device | CPU/memory change on simulator schedule |
-| Test device exceeds threshold | New alert; SNS if enabled |
-| Acknowledge and resolve | Alert status updates |
-| Logs and pagination | Search and 10/20/50-row pages over loaded data |
+Run reproducible tests showing that the team's infrastructure, backend, and monitoring/interface components work together as one workflow.
 
-## Record outcomes
-Mark each case passed, failed or untested; save screenshots with tokens, IDs and personal data redacted. Offline demo does not establish a live integration pass. Topology lines describe logical management relationships, not physical network discovery.
+## Suggested test cases
 
-## Live-test results worksheet
-
-| ID | Action | Evidence | Result |
-|---|---|---|---|
-| T01 | Sign in and read data | HTTP 200, token masked | Pending |
-| T02 | POST/GET/PUT/DELETE lab item | DynamoDB before/after | Pending |
-| T03 | Simulator dryRun and forcePeak | logs, lastSimulatedAt | Pending |
-| T04 | Cross threshold then recover | NetworkAlerts, email if enabled | Pending |
-| T05 | Read EC2 CPU/RAM/history | CloudWatch and chart | Pending |
-| T06 | Acknowledge/resolve, audit | handlingStatus, NetworkAuditLogs | Pending |
-| T07 | Missing token/scope | 401/403 | Pending |
-| T08 | Search, topology and pagination | UI capture | Pending |
-
-Record Pass/Fail after running each case along with timestamps, source and observed errors. The final demonstration should prioritize sign-in → management → simulation → alert → acknowledgment → history.
-
-## Additional test matrix for the Metrics Configuration version
-
-| Test | Action | Acceptance criterion |
+| ID | Test action | Expected result |
 |---|---|---|
-| EC2-01 | Register a valid existing instance ID in the Region | API records CLOUDWATCH source without launching EC2 |
-| EC2-02 | Try an unknown or already registered ID | Request rejected, no duplicate record |
-| MET-01 | Request 15-minute, one-hour and 24-hour history | Timestamped samples, no conversion of null to zero |
-| MET-02 | Switch CloudWatch and browser samples | Correct source label and time range |
-| SIM-01 | Set a simulation interval for lab devices | Successful save, check simulator logs and update timestamps |
-| UI-01 | Change filter and 10/20/50-row pagination | Correct rows and selection for the loaded dataset |
-| AUTH-01 | Call API without token or with missing scope | Request rejected; JWT remains enabled |
+| T01 | Request GET `/devices` without JWT | `401 Unauthorized` |
+| T02 | Sign in with Cognito and PKCE | Obtain a valid Access Token |
+| T03 | GET `/devices` with `read` scope | Receive the device list |
+| T04 | POST `/devices` with `TEST-SW01` | Record created in `NetworkDevices` |
+| T05 | GET/PUT `/devices/{id}` | Read and update the test device |
+| T06 | DELETE `/devices/{id}` | Delete only the test device |
+| T07 | GET `/alerts` | Read events in `NetworkAlerts` |
+| T08 | PUT `/alerts/{id}` | Change `handlingStatus` to `Acknowledged` or `Resolved` |
+| T09 | GET `/metrics` | Get actual EC2 CPU, memory and traffic when available |
+| T10 | Change a demo alarm state in a controlled test | Verify SNS and stored alert history |
 
-The supplied screenshots show a one-hour history response with 12 CPU and 59 RAM samples and a plotted browser-sample chart. Other tests require live account execution before marking them passed.
+## Evidence
 
+Capture Cognito Users (hide email addresses for public use), JWT routes, Lambda Test, DynamoDB Scan, CloudWatch Alarms, EventBridge rule, redacted SNS email, and API Test results. Label evidence screenshots `T01`, `T02`, etc.
+
+## Reporting
+
+Mark a case **Pass** only after executing it and collecting evidence. Mark untested cases as `Pending`, rather than assuming success. Never delete actual EC2 records; operate on `TEST-` device IDs only.
+
+## Recorded results and additional tests
+
+| Area | Recorded outcome |
+|---|---|
+| Lambda device list | HTTP 200 in Lambda Test |
+| CloudWatch EC2 | Backend retrieved CPU, memory, and NetworkIn/Out after namespace correction |
+| SNS | Test email received; automatic incident delivery still needs verification |
+| Local demo UI | CRUD, simulation, alerts, and handling were tested locally |
+| Browser-to-AWS | Separately verify sign-in, CRUD, status persistence, and extension routes |
+
+Additional scenario: add a simulated switch, observe CPU/memory changes over a cycle, test 96% CPU against an appropriate threshold, inspect the alert center, handle an alert, and review history. In AWS mode, compare DynamoDB items, Lambda logs, and email if enabled. Capture the network and infrastructure diagrams, labeling simulated devices; do not describe them as discovered physical links.
+
+Use small test data and avoid heavy EC2 load. Label simulations as demo mode. If values remain unchanged after a UI refresh, check the monitoring trigger, timestamps, API data, and refresh interval.
+
+---
+
+## Interface evidence on November 18, 2026
+
+TEST005 scenario: add a simulated switch with 95% CPU/RAM, observe its warning label, view details, open the edit form, confirm deletion and check that the list returns to five devices. Browser history records the add/delete actions. See Figures 60–66 and 68 in section 5.6.5. Figure 70 flags Router-A002 above the threshold but does not confirm SNS email delivery. Verify DynamoDB records, API responses and email separately before declaring end-to-end success.
+
+## Related evidence screenshots
+
+{{< netmonimg src="images/netmon-workshop/32-dynamodb-networkalerts-7-items.png" alt="Items in NetworkAlerts" caption="Figure 32 – Items in NetworkAlerts" >}}
+
+{{< netmonimg src="images/netmon-workshop/33-dynamodb-networkdevices-2-items.png" alt="Two items in NetworkDevices" caption="Figure 33 – Two items in NetworkDevices" >}}
+
+{{< netmonimg src="images/netmon-workshop/37-lambda-netmon-api-get-devices-test-200.png" alt="GET /devices returned HTTP 200 and device data" caption="Figure 37 – GET /devices returned HTTP 200 and device data" >}}
+
+{{< netmonimg src="images/netmon-workshop/38-api-gateway-netmon-management-api-routes.png" alt="Eight API Gateway routes" caption="Figure 38 – Eight API Gateway routes" >}}
+
+[← Back to chapter](../)
