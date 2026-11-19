@@ -1,5 +1,5 @@
 +++
-title = "4.1. Event 1 – Prove It Day 01"
+title = "4.1. Sự kiện 1 – Prove It Day 01"
 weight = 1
 translationKey = "event-1"
 +++
