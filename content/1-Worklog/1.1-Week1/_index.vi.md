@@ -6,7 +6,7 @@ translationKey = "week-01"
 
 ## Mục tiêu tuần 1:
 
-- Tạo tài khoản AWS và nắm các bước bảo vệ tài khoản cơ bản.
+- Tìm hiểu cách tạo tài khoản AWS và áp dụng các biện pháp bảo vệ tài khoản cơ bản.
 - Làm quen với AWS Management Console và những nhóm dịch vụ AWS thường dùng.
 
 ## Các công việc đã thực hiện:
