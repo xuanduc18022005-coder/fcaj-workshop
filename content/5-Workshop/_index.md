@@ -6,8 +6,6 @@ weight: 5
 translationKey: "workshop"
 ---
 
-> Shared NetMon Cloud team workshop, based on [Nguyen Tung Duong's report](https://tunduncode.github.io/nguyentungduong-fcj-report/5-workshop/). Screenshots and configurations reflect different implementation stages.
-
 ## Overview
 
 NetMon is an SME network infrastructure management and monitoring system on AWS, combining EC2 infrastructure with serverless services. This workshop follows the team's implementation in `us-east-1`, from account preparation, networking, and metric collection to API design, authentication, interface operation, and testing.
