@@ -1,53 +1,40 @@
 +++
-title = "5.3.3. Security groups and IAM roles"
+title = "5.3.3. Security Groups, IAM Roles, and Safe Access"
 weight = 3
-translationKey = "ws-2-3"
+translationKey = "ws-shared-5-3-3-security"
 +++
 
-## Steps
-1. In EC2 → Security Groups, review the group attached to the monitoring instance. Restrict rules to required access; do not expose SSH to `0.0.0.0/0`.
-2. For Session Manager, check the SSM Agent, instance profile and service endpoint connectivity. For SSH, allow only the necessary management source.
-3. In EC2 → Instances → Actions → Security → Modify IAM role, attach an approved monitoring role if needed.
+## Goal
 
-## Check
-The instance runs and the agent publishes configured metrics. Instance security does not replace JWT authorization on the HTTP API.
+Protect `netmon-ec2-server` and enable monitoring without exposing management ports to the entire Internet.
 
-[EC2 security groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)
+## Console steps
 
-## Connectivity troubleshooting
+1. Open **EC2 → Instances**, select `netmon-ec2-server`, and open **Security**.
+2. Inspect the attached **Security Group → Inbound rules**. Do not expose TCP/22 to `0.0.0.0/0` without a justified, reviewed need.
 
-| Issue | Check |
-|---|---|
-| Cannot connect | EC2 Connect, instance profile, SSM Agent, routing and outbound access |
-| CPU present, RAM missing | CloudWatch Agent, metric publishing role, namespace/dimensions |
-| Broad SSH rule | Security group inbound rules; restrict administration sources or remove unused rule |
+{{< netmonimg src="images/netmon-workshop/15-security-groups-list.png" alt="Security-group list" caption="Figure 15 – Security-group list" >}}
 
-Do not grant account administration rights to EC2 just for metrics. Mask private administrative addresses in public screenshots.
+{{< netmonimg src="images/netmon-workshop/16-netmon-ec2-sg-inbound-no-rules.png" alt="Empty inbound rules of netmon-ec2-sg" caption="Figure 16 – Empty inbound rules of netmon-ec2-sg" >}}
 
-## Network rules
+{{< netmonimg src="images/netmon-workshop/17-netmon-ec2-sg-outbound-all-traffic.png" alt="Outbound rules of netmon-ec2-sg" caption="Figure 17 – Outbound rules of netmon-ec2-sg" >}}
 
-| Field | Value to verify |
-|---|---|
-| Inbound | No rules (theo ảnh nhóm / team screenshot) |
-| Outbound | All traffic (ảnh nhóm / team screenshot) |
-| SSH TCP 22 | Không mở công khai / Do not expose publicly |
-| EC2 IAM role | CloudWatchAgentServerPolicy; SSM policy nếu dùng / if used |
+{{< netmonimg src="images/netmon-workshop/20-ec2-security-netmon-ec2-sg.png" alt="EC2 security tab" caption="Figure 20 – EC2 security tab" >}}
 
-Compare these values with existing resources; do not duplicate or modify working resources solely to match the lab.
+3. If using **AWS Systems Manager Session Manager**, verify the SSM Agent, IAM instance profile, and required network connectivity; otherwise use another restricted administration path.
+4. Use **EC2 → Actions → Security → Modify IAM role** to attach a suitable profile for publishing CloudWatch Agent metrics.
 
-## AWS Console walkthrough and evidence
+5. Verify the instance health and monitoring data in EC2 and CloudWatch.
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+## Verification
 
-### Step 1
+- Inbound rules match the demo's requirements and do not expose SSH globally.
+- Use an IAM role rather than storing AWS Access Keys on the server.
+- Check that administrative access works and can be revoked.
 
-EC2 → Security Groups → netmon-ec2-sg → Inbound rules. The screenshot shows no inbound rules; do not expose SSH.
+## Connectivity and security checks
 
-{{< photo src="workshop/aws-console/16-netmon-ec2-sg-inbound-no-rules.png" alt="EC2 → Security Groups → netmon-ec2-sg → Inbound rules. The screenshot shows no inbound rules; do not expose SSH." caption="Configuration evidence from the team." >}}
+The lab EC2 security group may have no inbound rules; its agent publishes metrics over outbound connections without exposing SSH to the Internet. For Session Manager, check the SSM Agent, permissions, and outbound HTTPS connectivity. Verify the EC2 role's `CloudWatchAgentServerPolicy` if publishing fails; this does not replace Lambda's metric-reading role. Do not publish administrative IPs or credentials.
 
-### Step 2
 
-Open Outbound rules: the team used All traffic; restrict according to connectivity requirements in production.
-
-{{< photo src="workshop/aws-console/17-netmon-ec2-sg-outbound-all-traffic.png" alt="Open Outbound rules: the team used All traffic; restrict according to connectivity requirements in production." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)

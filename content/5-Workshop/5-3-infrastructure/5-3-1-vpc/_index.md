@@ -1,75 +1,55 @@
 +++
-title = "5.3.1. Create VPC, subnets, route tables and IGW"
+title = "5.3.1. Create a VPC, Subnets, Routes, and IGW"
 weight = 1
-translationKey = "ws-2-1"
+translationKey = "ws-shared-5-3-1-vpc"
 +++
 
-## Steps
+## Objective
 
-1. Open VPC → Your VPCs → Create VPC, or reuse the existing VPC. Example CIDR: `10.0.0.0/16`.
-2. Create public subnet `10.0.0.0/20` and optional private subnet `10.0.128.0/20` in a suitable AZ.
-3. Attach an Internet Gateway. Add a `0.0.0.0/0` IGW route to the public route table and associate the correct subnet. Do not add an IGW route to the private subnet.
-4. Create the EC2 security group. Avoid SSH from all addresses; prefer Session Manager when permissions and connectivity are ready. Allow only necessary inbound traffic.
+Build a virtual network for the monitored EC2 instance, separating Internet-facing and internal resources.
 
-## Verification
+## AWS Console steps
 
-Check subnet associations, the public route and restricted security groups. Avoid an unnecessary NAT Gateway for this demo because it can incur costs.
+1. Go to **VPC → Your VPCs → Create VPC**. Choose an appropriate configuration. observed VPC CIDR `10.0.0.0/16`.
 
-Reference: [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html).
+{{< netmonimg src="images/netmon-workshop/06-netmon-vpc-resource-map.png" alt="netmon-vpc resource map" caption="Figure 06 – netmon-vpc resource map" >}}
 
-## Example settings
+2. Create a **public subnet** (e.g., `10.0.0.0/20`) and a **private subnet** (e.g., `10.0.128.0/20`) in the appropriate Availability Zone.
 
-| Component | Value in team screenshots |
-|---|---|
-| VPC | netmon-vpc, 10.0.0.0/16 |
-| Public subnet | 10.0.0.0/20 |
-| Private subnet, if present | 10.0.128.0/20 |
-| Public route table | local; 0.0.0.0/0 → IGW |
-| Private route table | local; no direct IGW route |
+{{< netmonimg src="images/netmon-workshop/07-subnet-list.png" alt="List of two subnets" caption="Figure 07 – List of two subnets" >}}
 
-These CIDRs match the team screenshots; do not change existing infrastructure to match the report. In Your VPCs → select the VPC → Resource map, verify subnet and route associations. For EC2 metric delivery, verify outbound connectivity to the relevant AWS services or appropriate endpoints; do not open inbound ports just to publish metrics.
+{{< netmonimg src="images/netmon-workshop/08-public-subnet-details.png" alt="Public subnet details" caption="Figure 08 – Public subnet details" >}}
 
-**Evidence:** Resource map, route-table associations and attached Internet Gateway.
+{{< netmonimg src="images/netmon-workshop/09-private-subnet-details.png" alt="Private subnet details" caption="Figure 09 – Private subnet details" >}}
+
+3. Create an **Internet Gateway** and attach it to the VPC.
+
+{{< netmonimg src="images/netmon-workshop/14-netmon-igw-details.png" alt="netmon-igw internet gateway" caption="Figure 14 – netmon-igw internet gateway" >}}
+
+4. Create a **public route table**, add `0.0.0.0/0` pointing to the Internet Gateway, and associate it with the public subnet.
+
+{{< netmonimg src="images/netmon-workshop/10-route-tables-list.png" alt="Route-table list" caption="Figure 10 – Route-table list" >}}
+
+{{< netmonimg src="images/netmon-workshop/11-netmon-rtb-public-routes.png" alt="Routes in netmon-rtb-public" caption="Figure 11 – Routes in netmon-rtb-public" >}}
+
+{{< netmonimg src="images/netmon-workshop/12-netmon-main-route-table-no-name.png" alt="VPC main route table" caption="Figure 12 – VPC main route table" >}}
+
+{{< netmonimg src="images/netmon-workshop/13-netmon-rtb-private1-us-east-1a-routes.png" alt="Private subnet route table" caption="Figure 13 – Private subnet route table" >}}
+
+5. A private subnet has no automatic Internet access. If outbound Internet access is required, design NAT appropriately and consider the cost before creating it.
+6. Review **Network ACLs** and **Security Groups** against the required traffic flows and deny unnecessary access.
+
+## Evidence to capture
+
+- VPC, CIDR ranges, and subnet list.
+- Route table and Internet Gateway association.
+- Security Group attached to EC2.
+
+> Do not create a NAT Gateway solely for screenshots. It can incur hourly and data-processing charges.
+
+## Relationship to NetMon architecture
+
+EC2 resides in the public subnet for the lab. The private subnet is available for future internal components; this does not imply that a server has been deployed there. API Gateway, Cognito, DynamoDB and Lambda do not automatically reside in these subnets; connect Lambda to the VPC only when private resources require it. Infrastructure diagrams should reflect AWS resources; the interface's network map may display simulated devices and is not an automatically discovered physical topology.
 
 
-## AWS Console walkthrough and evidence
-
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
-
-### Step 1
-
-VPC → Your VPCs → netmon-vpc → Resource map. Check the IPv4 CIDR and subnet/route-table associations.
-
-{{< photo src="workshop/aws-console/06-netmon-vpc-resource-map.png" alt="VPC → Your VPCs → netmon-vpc → Resource map. Check the IPv4 CIDR and subnet/route-table associations." caption="Configuration evidence from the team." >}}
-
-### Step 2
-
-VPC → Subnets → select the public subnet; check 10.0.0.0/20, us-east-1a, and public route table.
-
-{{< photo src="workshop/aws-console/08-public-subnet-details.png" alt="VPC → Subnets → select the public subnet; check 10.0.0.0/20, us-east-1a, and public route table." caption="Configuration evidence from the team." >}}
-
-### Step 3
-
-Select the private subnet; verify 10.0.128.0/20 and Auto-assign public IPv4 address = No.
-
-{{< photo src="workshop/aws-console/09-private-subnet-details.png" alt="Select the private subnet; verify 10.0.128.0/20 and Auto-assign public IPv4 address = No." caption="Configuration evidence from the team." >}}
-
-### Step 4
-
-Internet gateways → netmon IGW: verify Attached status and associated VPC.
-
-{{< photo src="workshop/aws-console/14-netmon-igw-details.png" alt="Internet gateways → netmon IGW: verify Attached status and associated VPC." caption="Configuration evidence from the team." >}}
-
-### Step 5
-
-Route tables → netmon-rtb-public → Routes: verify local and 0.0.0.0/0 → IGW.
-
-{{< photo src="workshop/aws-console/11-netmon-rtb-public-routes.png" alt="Route tables → netmon-rtb-public → Routes: verify local and 0.0.0.0/0 → IGW." caption="Configuration evidence from the team." >}}
-
-### Step 6
-
-Private route table → Routes and Subnet associations: check the local route and absence of a direct IGW route.
-
-{{< photo src="workshop/aws-console/13-netmon-rtb-private1-us-east-1a-routes.png" alt="Private route table → Routes and Subnet associations: check the local route and absence of a direct IGW route." caption="Configuration evidence from the team." >}}
-
-**Related interface screenshots:** [AWS architecture and network topology](../../#netmon-topology).
+[← Back to chapter](../)

@@ -1,58 +1,41 @@
 +++
-title = "5.3.2. Launch an Ubuntu EC2 instance"
+title = "5.3.2. Launch an Ubuntu EC2 Instance"
 weight = 2
-translationKey = "ws-2-2"
+translationKey = "ws-shared-5-3-2-ec2"
 +++
+
+## Objective
+
+Launch an Ubuntu server for CloudWatch monitoring tests while reducing unauthorized-access risks.
 
 ## Steps
 
-1. Open EC2 → Instances → Launch instances. Example name: `netmon-ec2-server`; choose Ubuntu, instance type and EBS suitable for the budget.
-2. Select the prepared VPC/subnet and security group. For Session Manager, ensure the SSM agent, instance profile and service connectivity are configured.
-3. Attach an IAM role with the minimum CloudWatch agent permissions; do not place access keys on the server or frontend.
-4. Start the instance, verify Running and status checks. Register its instance ID in NetMon with the CloudWatch source. Install the agent in step 5.4.1.
+1. Open **EC2 → Instances → Launch instances**.
+2. Set the instance name to `netmon-ec2-server`, matching the lab naming convention.
+3. Choose **Ubuntu Server 24.04 LTS** and an instance type appropriate to the available budget and usage limits.
+
+4. In **Network settings**, select the intended VPC and public subnet and review public IP assignment.
+
+5. Configure the **Security Group**: do not allow SSH port `22` from `0.0.0.0/0`. Restrict SSH to trusted administrator addresses or use Systems Manager Session Manager when supported.
+
+6. Keep EBS storage appropriately sized; EBS can still incur costs after an instance is stopped.
+7. Launch the instance and wait for the EC2 status checks to pass. Attach an IAM instance profile if CloudWatch Agent requires access to publish metrics or logs.
+
+{{< netmonimg src="images/netmon-workshop/18-ec2-instances-netmon-list.png" alt="EC2 instance list" caption="Figure 18 – EC2 instance list" >}}
+
+{{< netmonimg src="images/netmon-workshop/19-ec2-netmon-ec2-server-details.png" alt="netmon-ec2-server instance details" caption="Figure 19 – netmon-ec2-server instance details" >}}
 
 ## Verification
 
-EC2 is running and CPU data appears in CloudWatch; RAM requires the agent. Use actual identifiers only in private configuration.
+- The instance is `Running` when monitoring is needed.
+- CloudWatch shows CPUUtilization for the correct InstanceId.
+- Capture the instance name, type, subnet, Security Group, and status checks (redact details you do not wish to publish).
 
-Reference: [Getting started with EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html).
+> Stopping EC2 generally stops running compute charges, but not necessarily EBS or public IPv4 charges.
 
-## Launch-instance settings
+## Register EC2 as a device
 
-- Name: `netmon-ec2-server` (example); Application and OS Images: Ubuntu Server 24.04 LTS.
-- Choose an instance type within budget (for example t3.micro); edit Network settings to select the team VPC, subnet and security group.
-- Choose needed EBS storage; retained volumes may still incur charges. Under Advanced details, select the approved IAM instance profile for the agent if needed.
-- After launch, inspect Details, Monitoring, status checks and CPU data before changing the agent.
+Identify the instance ID, appropriate IP address, and Region on the **Instances** page. In NetMon, store a separate `deviceId` and the `instanceId` used for CloudWatch queries. Select the AWS EC2 source according to the frontend configuration rather than entering simulated CPU/memory. If EC2 stops or metrics are missing, display the relevant status or unavailable data instead of assigning 0%.
 
-If using Session Manager, confirm Connect → Session Manager works. Reuse the existing EC2 instance when possible.
 
-## Deployment parameters
-
-| Field | Value to verify |
-|---|---|
-| Name | netmon-ec2-server |
-| AMI | Ubuntu Server 24.04 LTS |
-| Instance type | t3.micro |
-| VPC | netmon-vpc |
-| Subnet | netmon-subnet-public1-us-east-1a |
-| Security group | netmon-ec2-sg |
-| IAM instance profile | CloudWatch Agent / SSM nếu cần / if needed |
-
-Compare these values with existing resources; do not duplicate or modify working resources solely to match the lab.
-
-## AWS Console walkthrough and evidence
-
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
-
-### Step 1
-
-EC2 → Instances: select netmon-ec2-server and check instance state and status checks.
-
-{{< photo src="workshop/aws-console/18-ec2-instances-netmon-list.png" alt="EC2 → Instances: select netmon-ec2-server and check instance state and status checks." caption="Configuration evidence from the team." >}}
-
-### Step 2
-
-Open Details: check name, instance type, VPC and subnet; copy the instance ID into private NetMon configuration.
-
-{{< photo src="workshop/aws-console/19-ec2-netmon-ec2-server-details.png" alt="Open Details: check name, instance type, VPC and subnet; copy the instance ID into private NetMon configuration." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)
