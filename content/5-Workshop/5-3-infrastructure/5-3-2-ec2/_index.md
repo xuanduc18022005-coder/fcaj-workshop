@@ -1,5 +1,5 @@
 ---
-title: "5.3.2. Launch an Ubuntu EC2 Instance"
+title: "5.2.2. Launch an Ubuntu EC2 Instance"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 2

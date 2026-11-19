@@ -1,5 +1,5 @@
 ---
-title: "5.6.5. Vận hành giao diện quản lý NetMon"
+title: "5.5.5. Vận hành giao diện quản lý NetMon"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 5
@@ -7,7 +7,7 @@ weight: 5
 
 ## Bước 1 – Cấu hình và kết nối
 
-Mở NetMon bằng Live Server tại `http://localhost:5500/` và đăng nhập theo mục 5.6.4. Chọn **Cấu hình & kết nối**, kiểm tra Invoke URL, Region `us-east-1`, các route và thông tin Cognito. Trong ảnh, ngưỡng hiển thị CPU/RAM là 80% và chu kỳ làm mới 60 giây. Bấm **Lưu cấu hình** nếu thay đổi. Các thiết lập này lưu tại trình duyệt, không tự sửa ngưỡng CloudWatch hay Lambda; không nhập AWS Secret Access Key.
+Mở NetMon bằng Live Server tại `http://localhost:5500/` và đăng nhập theo mục 5.5.4. Chọn **Cấu hình & kết nối**, kiểm tra Invoke URL, Region `us-east-1`, các route và thông tin Cognito. Trong ảnh, ngưỡng hiển thị CPU/RAM là 80% và chu kỳ làm mới 60 giây. Bấm **Lưu cấu hình** nếu thay đổi. Các thiết lập này lưu tại trình duyệt, không tự sửa ngưỡng CloudWatch hay Lambda; không nhập AWS Secret Access Key.
 
 {{< netmonimg src="images/netmon-workshop/69-netmon-configuration-connection.png" alt="Cấu hình API, ngưỡng hiển thị và chu kỳ làm mới" caption="Ảnh 69 – Cấu hình API, ngưỡng hiển thị và chu kỳ làm mới" >}}
 

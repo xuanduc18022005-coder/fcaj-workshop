@@ -1,5 +1,5 @@
 ---
-title: "5.2.3. Thiết lập AWS Budgets và kiểm soát chi phí"
+title: "5.1.3. Thiết lập AWS Budgets và kiểm soát chi phí"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 3

@@ -1,5 +1,5 @@
 ---
-title: "5.6.2. Create a JWT Authorizer and OAuth Scopes"
+title: "5.5.2. Create a JWT Authorizer and OAuth Scopes"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 2

@@ -1,5 +1,5 @@
 ---
-title: "5.7.1. Kiểm thử từ giao diện đến CloudWatch/DynamoDB"
+title: "5.6.1. Kiểm thử từ giao diện đến CloudWatch/DynamoDB"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1
@@ -50,7 +50,7 @@ Khi demo, ưu tiên dữ liệu nhỏ, không tạo tải lớn trên EC2. Nếu
 
 ## Minh chứng giao diện ngày 18/11/2026
 
-Kịch bản TEST005: thêm Switch mô phỏng CPU/RAM 95%, thấy nhãn Cảnh báo, xem chi tiết, mở biểu mẫu sửa, xác nhận xóa và kiểm tra danh sách trở về 5 thiết bị. Nhật ký trình duyệt ghi lại thao tác thêm/xóa. Xem các ảnh 60–66 và 68 tại mục 5.6.5. Dashboard ở ảnh 70 phát hiện Router-A002 vượt ngưỡng, nhưng không xác nhận SNS đã gửi email. Cần đối chiếu riêng bản ghi DynamoDB, phản hồi API và email để kết luận kiểm thử toàn trình.
+Kịch bản TEST005: thêm Switch mô phỏng CPU/RAM 95%, thấy nhãn Cảnh báo, xem chi tiết, mở biểu mẫu sửa, xác nhận xóa và kiểm tra danh sách trở về 5 thiết bị. Nhật ký trình duyệt ghi lại thao tác thêm/xóa. Xem các ảnh 60–66 và 68 tại mục 5.5.5. Dashboard ở ảnh 70 phát hiện Router-A002 vượt ngưỡng, nhưng không xác nhận SNS đã gửi email. Cần đối chiếu riêng bản ghi DynamoDB, phản hồi API và email để kết luận kiểm thử toàn trình.
 
 ## Các ảnh minh chứng liên quan
 

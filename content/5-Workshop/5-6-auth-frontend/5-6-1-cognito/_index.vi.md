@@ -1,5 +1,5 @@
 ---
-title: "5.6.1. Tạo Cognito User Pool và Web Client"
+title: "5.5.1. Tạo Cognito User Pool và Web Client"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1

@@ -1,5 +1,5 @@
 ---
-title: "5.2.1. Đăng nhập AWS và chọn Region"
+title: "5.1.1. Đăng nhập AWS và chọn Region"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1
@@ -31,7 +31,7 @@ Chọn đúng Region `us-east-1`, kiểm tra quyền truy cập AWS Console và 
 
 ## Quy ước môi trường NetMon
 
-Dùng một tài khoản AWS của nhóm, Region `us-east-1` cho EC2, CloudWatch, Lambda, API Gateway, DynamoDB và Cognito. IAM và Billing có phạm vi khác với dịch vụ theo Region. Ghi lại tên tài nguyên và URL API dùng cho cấu hình giao diện, không đưa khóa truy cập hay mật khẩu vào mã nguồn. Chi tiết Budgets được thực hiện ở mục 5.2.3.
+Dùng một tài khoản AWS của nhóm, Region `us-east-1` cho EC2, CloudWatch, Lambda, API Gateway, DynamoDB và Cognito. IAM và Billing có phạm vi khác với dịch vụ theo Region. Ghi lại tên tài nguyên và URL API dùng cho cấu hình giao diện, không đưa khóa truy cập hay mật khẩu vào mã nguồn. Chi tiết Budgets được thực hiện ở mục 5.1.3.
 
 
 [← Về chương](../)

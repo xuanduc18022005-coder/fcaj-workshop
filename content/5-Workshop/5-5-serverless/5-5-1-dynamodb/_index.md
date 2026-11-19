@@ -1,5 +1,5 @@
 ---
-title: "5.5.1. Create NetworkDevices and NetworkAlerts Tables"
+title: "5.4.1. Create NetworkDevices and NetworkAlerts Tables"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1

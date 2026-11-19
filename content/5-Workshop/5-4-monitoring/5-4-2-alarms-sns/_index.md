@@ -1,5 +1,5 @@
 ---
-title: "5.4.2. Create CloudWatch Alarms and SNS Email"
+title: "5.3.2. Create CloudWatch Alarms and SNS Email"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 2

@@ -1,5 +1,5 @@
 ---
-title: "5.6.5. Operate the NetMon Management Interface"
+title: "5.5.5. Operate the NetMon Management Interface"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 5
@@ -7,7 +7,7 @@ weight: 5
 
 ## Step 1 – Configuration and connection
 
-Open NetMon with Live Server at `http://localhost:5500/` and sign in as described in 5.6.4. Select **Configuration & connection (Cấu hình & kết nối)** and verify the Invoke URL, Region `us-east-1`, routes and Cognito information. The screenshot shows 80% CPU/RAM display thresholds and a 60-second refresh interval. Save changes if needed. These browser settings do not automatically update CloudWatch or Lambda thresholds; never enter an AWS Secret Access Key.
+Open NetMon with Live Server at `http://localhost:5500/` and sign in as described in 5.5.4. Select **Configuration & connection (Cấu hình & kết nối)** and verify the Invoke URL, Region `us-east-1`, routes and Cognito information. The screenshot shows 80% CPU/RAM display thresholds and a 60-second refresh interval. Save changes if needed. These browser settings do not automatically update CloudWatch or Lambda thresholds; never enter an AWS Secret Access Key.
 
 {{< netmonimg src="images/netmon-workshop/69-netmon-configuration-connection.png" alt="API configuration, display thresholds and refresh interval" caption="Figure 69 – API configuration, display thresholds and refresh interval" >}}
 

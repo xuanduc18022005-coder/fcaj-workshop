@@ -1,5 +1,5 @@
 ---
-title: "5.5.5. Mô phỏng thiết bị và giám sát tự động"
+title: "5.4.5. Mô phỏng thiết bị và giám sát tự động"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 5

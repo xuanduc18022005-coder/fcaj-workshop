@@ -12,6 +12,8 @@ NetMon là hệ thống quản lý và giám sát hạ tầng mạng doanh nghi�
 
 ## Kiến trúc và cách hệ thống hoạt động
 
+{{< photo src="proposal/architecture-vi.svg" alt="Hình 1. Kiến trúc hệ thống NetMon Cloud." caption="Hình 1. Kiến trúc hệ thống NetMon Cloud." >}}
+
 | Thành phần | Vai trò |
 |---|---|
 | VPC, Subnet, Security Group, EC2 | Hạ tầng mạng và máy chủ Ubuntu được giám sát thực tế |
@@ -38,44 +40,42 @@ NetMon là hệ thống quản lý và giám sát hạ tầng mạng doanh nghi�
 
 ## Danh sách chương thực hành
 
-1. [5.1. Tổng quan](5-1-overview/)
+1. [5.1. Chuẩn bị môi trường & chọn Region](5-2-preparation/)
+   - [5.1.1. Đăng nhập AWS và chọn Region](5-2-preparation/5-2-1-region-budget/)
+   - [5.1.2. Cấu hình IAM và phân công nhóm](5-2-preparation/5-2-2-iam/)
+   - [5.1.3. Thiết lập AWS Budgets và kiểm soát chi phí](5-2-preparation/5-2-3-budget/)
 
-2. [5.2. Chuẩn bị môi trường & chọn Region](5-2-preparation/)
-   - [5.2.1. Đăng nhập AWS và chọn Region](5-2-preparation/5-2-1-region-budget/)
-   - [5.2.2. Cấu hình IAM và phân công nhóm](5-2-preparation/5-2-2-iam/)
-   - [5.2.3. Thiết lập AWS Budgets và kiểm soát chi phí](5-2-preparation/5-2-3-budget/)
+2. [5.2. Thiết kế hạ tầng VPC và EC2](5-3-infrastructure/)
+   - [5.2.1. Tạo VPC, Subnet, Route Table và IGW](5-3-infrastructure/5-3-1-vpc/)
+   - [5.2.2. Tạo máy chủ Ubuntu EC2](5-3-infrastructure/5-3-2-ec2/)
+   - [5.2.3. Security Group, IAM Role và truy cập an toàn](5-3-infrastructure/5-3-3-security/)
 
-3. [5.3. Thiết kế hạ tầng VPC và EC2](5-3-infrastructure/)
-   - [5.3.1. Tạo VPC, Subnet, Route Table và IGW](5-3-infrastructure/5-3-1-vpc/)
-   - [5.3.2. Tạo máy chủ Ubuntu EC2](5-3-infrastructure/5-3-2-ec2/)
-   - [5.3.3. Security Group, IAM Role và truy cập an toàn](5-3-infrastructure/5-3-3-security/)
+3. [5.3. CloudWatch, SNS và EventBridge](5-4-monitoring/)
+   - [5.3.1. Thu thập các chỉ số CPU, RAM và Disk](5-4-monitoring/5-4-1-metrics/)
+   - [5.3.2. Tạo CloudWatch Alarm và gửi SNS Email](5-4-monitoring/5-4-2-alarms-sns/)
+   - [5.3.3. Tạo quy tắc EventBridge chuyển trạng thái Alarm](5-4-monitoring/5-4-3-eventbridge/)
+   - [5.3.4. Lambda lưu lịch sử cảnh báo vào DynamoDB](5-4-monitoring/5-4-4-alert-history/)
 
-4. [5.4. CloudWatch, SNS và EventBridge](5-4-monitoring/)
-   - [5.4.1. Thu thập các chỉ số CPU, RAM và Disk](5-4-monitoring/5-4-1-metrics/)
-   - [5.4.2. Tạo CloudWatch Alarm và gửi SNS Email](5-4-monitoring/5-4-2-alarms-sns/)
-   - [5.4.3. Tạo quy tắc EventBridge chuyển trạng thái Alarm](5-4-monitoring/5-4-3-eventbridge/)
-   - [5.4.4. Lambda lưu lịch sử cảnh báo vào DynamoDB](5-4-monitoring/5-4-4-alert-history/)
+4. [5.4. Lambda, DynamoDB và API Gateway](5-5-serverless/)
+   - [5.4.1. Khởi tạo bảng NetworkDevices và NetworkAlerts](5-5-serverless/5-5-1-dynamodb/)
+   - [5.4.2. Viết Lambda netmon-api bằng Python](5-5-serverless/5-5-2-lambda-api/)
+   - [5.4.3. Xây dựng HTTP API Gateway với 8 Routes](5-5-serverless/5-5-3-api-gateway/)
+   - [5.4.4. Kiểm thử CRUD và truy vấn dữ liệu](5-5-serverless/5-5-4-crud-test/)
+   - [5.4.5. Mô phỏng thiết bị và giám sát tự động](5-5-serverless/5-5-5-simulation/)
 
-5. [5.5. Lambda, DynamoDB và API Gateway](5-5-serverless/)
-   - [5.5.1. Khởi tạo bảng NetworkDevices và NetworkAlerts](5-5-serverless/5-5-1-dynamodb/)
-   - [5.5.2. Viết Lambda netmon-api bằng Python](5-5-serverless/5-5-2-lambda-api/)
-   - [5.5.3. Xây dựng HTTP API Gateway với 8 Routes](5-5-serverless/5-5-3-api-gateway/)
-   - [5.5.4. Kiểm thử CRUD và truy vấn dữ liệu](5-5-serverless/5-5-4-crud-test/)
-   - [5.5.5. Mô phỏng thiết bị và giám sát tự động](5-5-serverless/5-5-5-simulation/)
+5. [5.5. Cognito, JWT và giao diện NetMon](5-6-auth-frontend/)
+   - [5.5.1. Tạo Cognito User Pool và Web Client](5-6-auth-frontend/5-6-1-cognito/)
+   - [5.5.2. Tạo JWT Authorizer và OAuth Scopes](5-6-auth-frontend/5-6-2-jwt/)
+   - [5.5.3. Xây dựng trang kiểm thử trên VS Code](5-6-auth-frontend/5-6-3-test-ui/)
+   - [5.5.4. Đăng nhập bằng PKCE và gọi API được bảo vệ](5-6-auth-frontend/5-6-4-frontend-login/)
+   - [5.5.5. Vận hành giao diện quản lý NetMon](5-6-auth-frontend/5-6-5-netmon-interface/)
 
-6. [5.6. Cognito, JWT và giao diện NetMon](5-6-auth-frontend/)
-   - [5.6.1. Tạo Cognito User Pool và Web Client](5-6-auth-frontend/5-6-1-cognito/)
-   - [5.6.2. Tạo JWT Authorizer và OAuth Scopes](5-6-auth-frontend/5-6-2-jwt/)
-   - [5.6.3. Xây dựng trang kiểm thử trên VS Code](5-6-auth-frontend/5-6-3-test-ui/)
-   - [5.6.4. Đăng nhập bằng PKCE và gọi API được bảo vệ](5-6-auth-frontend/5-6-4-frontend-login/)
-   - [5.6.5. Vận hành giao diện quản lý NetMon](5-6-auth-frontend/5-6-5-netmon-interface/)
-
-7. [5.7. Kiểm thử tổng thể và dọn dẹp tài nguyên](5-7-testing-cleanup/)
-   - [5.7.1. Kiểm thử từ giao diện đến CloudWatch/DynamoDB](5-7-testing-cleanup/5-7-1-e2e/)
-   - [5.7.2. Kiểm tra chi phí và sao lưu minh chứng](5-7-testing-cleanup/5-7-2-cleanup/)
-   - [5.7.3. Dọn dẹp CloudWatch, SNS và EventBridge](5-7-testing-cleanup/5-7-3-monitoring-cleanup/)
-   - [5.7.4. Dọn dẹp Lambda, DynamoDB và API Gateway](5-7-testing-cleanup/5-7-4-serverless-cleanup/)
-   - [5.7.5. Dọn dẹp Cognito và tài nguyên mạng](5-7-testing-cleanup/5-7-5-auth-cleanup/)
+6. [5.6. Kiểm thử tổng thể và dọn dẹp tài nguyên](5-7-testing-cleanup/)
+   - [5.6.1. Kiểm thử từ giao diện đến CloudWatch/DynamoDB](5-7-testing-cleanup/5-7-1-e2e/)
+   - [5.6.2. Kiểm tra chi phí và sao lưu minh chứng](5-7-testing-cleanup/5-7-2-cleanup/)
+   - [5.6.3. Dọn dẹp CloudWatch, SNS và EventBridge](5-7-testing-cleanup/5-7-3-monitoring-cleanup/)
+   - [5.6.4. Dọn dẹp Lambda, DynamoDB và API Gateway](5-7-testing-cleanup/5-7-4-serverless-cleanup/)
+   - [5.6.5. Dọn dẹp Cognito và tài nguyên mạng](5-7-testing-cleanup/5-7-5-auth-cleanup/)
 
 ## Kết quả và phạm vi kiểm chứng
 
@@ -102,7 +102,7 @@ Dashboard hiển thị số lượng thiết bị, trạng thái hoạt động 
 
 ### Đăng nhập và xác thực
 
-Người dùng cần xác thực để sử dụng chức năng quản lý dữ liệu AWS. Giao diện trước khi đăng nhập được minh họa dưới đây; cấu hình Cognito và JWT nằm ở mục 5.6.
+Người dùng cần xác thực để sử dụng chức năng quản lý dữ liệu AWS. Giao diện trước khi đăng nhập được minh họa dưới đây; cấu hình Cognito và JWT nằm ở mục 5.5.
 
 {{< photo src="workshop/evidence/24_Man_hinh_chua_dang_nhap.png" alt="Giao diện NetMon trước khi đăng nhập; không phải Cognito Hosted UI." caption="Kiểm thử giao diện – API giả lập. Giao diện NetMon trước khi đăng nhập; không phải Cognito Hosted UI." >}}
 

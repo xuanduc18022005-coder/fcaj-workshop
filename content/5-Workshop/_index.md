@@ -12,6 +12,8 @@ NetMon is an SME network infrastructure management and monitoring system on AWS,
 
 ## Architecture and system operation
 
+{{< photo src="proposal/architecture-en.svg" alt="Figure 1. NetMon Cloud system architecture." caption="Figure 1. NetMon Cloud system architecture." >}}
+
 | Component | Role |
 |---|---|
 | VPC, Subnet, Security Group, EC2 | Network infrastructure and the monitored Ubuntu server |
@@ -38,44 +40,42 @@ NetMon is an SME network infrastructure management and monitoring system on AWS,
 
 ## Hands-on chapters
 
-1. [5.1. Overview](5-1-overview/)
+1. [5.1. Environment Preparation & Region](5-2-preparation/)
+   - [5.1.1. AWS Sign-in and Region](5-2-preparation/5-2-1-region-budget/)
+   - [5.1.2. IAM Setup and Team Roles](5-2-preparation/5-2-2-iam/)
+   - [5.1.3. AWS Budgets and Cost Controls](5-2-preparation/5-2-3-budget/)
 
-2. [5.2. Environment Preparation & Region](5-2-preparation/)
-   - [5.2.1. AWS Sign-in and Region](5-2-preparation/5-2-1-region-budget/)
-   - [5.2.2. IAM Setup and Team Roles](5-2-preparation/5-2-2-iam/)
-   - [5.2.3. AWS Budgets and Cost Controls](5-2-preparation/5-2-3-budget/)
+2. [5.2. VPC and EC2 Infrastructure](5-3-infrastructure/)
+   - [5.2.1. Create a VPC, Subnets, Routes, and IGW](5-3-infrastructure/5-3-1-vpc/)
+   - [5.2.2. Launch an Ubuntu EC2 Instance](5-3-infrastructure/5-3-2-ec2/)
+   - [5.2.3. Security Groups, IAM Roles, and Safe Access](5-3-infrastructure/5-3-3-security/)
 
-3. [5.3. VPC and EC2 Infrastructure](5-3-infrastructure/)
-   - [5.3.1. Create a VPC, Subnets, Routes, and IGW](5-3-infrastructure/5-3-1-vpc/)
-   - [5.3.2. Launch an Ubuntu EC2 Instance](5-3-infrastructure/5-3-2-ec2/)
-   - [5.3.3. Security Groups, IAM Roles, and Safe Access](5-3-infrastructure/5-3-3-security/)
+3. [5.3. CloudWatch, SNS, and EventBridge](5-4-monitoring/)
+   - [5.3.1. Collect CPU, RAM, and Disk Metrics](5-4-monitoring/5-4-1-metrics/)
+   - [5.3.2. Create CloudWatch Alarms and SNS Email](5-4-monitoring/5-4-2-alarms-sns/)
+   - [5.3.3. Route Alarm Changes with EventBridge](5-4-monitoring/5-4-3-eventbridge/)
+   - [5.3.4. Store Alert History with Lambda and DynamoDB](5-4-monitoring/5-4-4-alert-history/)
 
-4. [5.4. CloudWatch, SNS, and EventBridge](5-4-monitoring/)
-   - [5.4.1. Collect CPU, RAM, and Disk Metrics](5-4-monitoring/5-4-1-metrics/)
-   - [5.4.2. Create CloudWatch Alarms and SNS Email](5-4-monitoring/5-4-2-alarms-sns/)
-   - [5.4.3. Route Alarm Changes with EventBridge](5-4-monitoring/5-4-3-eventbridge/)
-   - [5.4.4. Store Alert History with Lambda and DynamoDB](5-4-monitoring/5-4-4-alert-history/)
+4. [5.4. Lambda, DynamoDB, and API Gateway](5-5-serverless/)
+   - [5.4.1. Create NetworkDevices and NetworkAlerts Tables](5-5-serverless/5-5-1-dynamodb/)
+   - [5.4.2. Build the netmon-api Python Lambda](5-5-serverless/5-5-2-lambda-api/)
+   - [5.4.3. Build an HTTP API with Eight Routes](5-5-serverless/5-5-3-api-gateway/)
+   - [5.4.4. Test CRUD and Data Queries](5-5-serverless/5-5-4-crud-test/)
+   - [5.4.5. Device Simulation and Automated Monitoring](5-5-serverless/5-5-5-simulation/)
 
-5. [5.5. Lambda, DynamoDB, and API Gateway](5-5-serverless/)
-   - [5.5.1. Create NetworkDevices and NetworkAlerts Tables](5-5-serverless/5-5-1-dynamodb/)
-   - [5.5.2. Build the netmon-api Python Lambda](5-5-serverless/5-5-2-lambda-api/)
-   - [5.5.3. Build an HTTP API with Eight Routes](5-5-serverless/5-5-3-api-gateway/)
-   - [5.5.4. Test CRUD and Data Queries](5-5-serverless/5-5-4-crud-test/)
-   - [5.5.5. Device Simulation and Automated Monitoring](5-5-serverless/5-5-5-simulation/)
+5. [5.5. Cognito, JWT, and the NetMon Interface](5-6-auth-frontend/)
+   - [5.5.1. Create a Cognito User Pool and Web Client](5-6-auth-frontend/5-6-1-cognito/)
+   - [5.5.2. Create a JWT Authorizer and OAuth Scopes](5-6-auth-frontend/5-6-2-jwt/)
+   - [5.5.3. Build a VS Code Test Page](5-6-auth-frontend/5-6-3-test-ui/)
+   - [5.5.4. Sign In with PKCE and Call Protected APIs](5-6-auth-frontend/5-6-4-frontend-login/)
+   - [5.5.5. Operate the NetMon Management Interface](5-6-auth-frontend/5-6-5-netmon-interface/)
 
-6. [5.6. Cognito, JWT, and the NetMon Interface](5-6-auth-frontend/)
-   - [5.6.1. Create a Cognito User Pool and Web Client](5-6-auth-frontend/5-6-1-cognito/)
-   - [5.6.2. Create a JWT Authorizer and OAuth Scopes](5-6-auth-frontend/5-6-2-jwt/)
-   - [5.6.3. Build a VS Code Test Page](5-6-auth-frontend/5-6-3-test-ui/)
-   - [5.6.4. Sign In with PKCE and Call Protected APIs](5-6-auth-frontend/5-6-4-frontend-login/)
-   - [5.6.5. Operate the NetMon Management Interface](5-6-auth-frontend/5-6-5-netmon-interface/)
-
-7. [5.7. End-to-End Tests and Resource Cleanup](5-7-testing-cleanup/)
-   - [5.7.1. Test from the UI to CloudWatch/DynamoDB](5-7-testing-cleanup/5-7-1-e2e/)
-   - [5.7.2. Review Costs and Preserve Evidence](5-7-testing-cleanup/5-7-2-cleanup/)
-   - [5.7.3. Clean Up CloudWatch, SNS, and EventBridge](5-7-testing-cleanup/5-7-3-monitoring-cleanup/)
-   - [5.7.4. Clean Up Lambda, DynamoDB, and API Gateway](5-7-testing-cleanup/5-7-4-serverless-cleanup/)
-   - [5.7.5. Clean Up Cognito and Networking Resources](5-7-testing-cleanup/5-7-5-auth-cleanup/)
+6. [5.6. End-to-End Tests and Resource Cleanup](5-7-testing-cleanup/)
+   - [5.6.1. Test from the UI to CloudWatch/DynamoDB](5-7-testing-cleanup/5-7-1-e2e/)
+   - [5.6.2. Review Costs and Preserve Evidence](5-7-testing-cleanup/5-7-2-cleanup/)
+   - [5.6.3. Clean Up CloudWatch, SNS, and EventBridge](5-7-testing-cleanup/5-7-3-monitoring-cleanup/)
+   - [5.6.4. Clean Up Lambda, DynamoDB, and API Gateway](5-7-testing-cleanup/5-7-4-serverless-cleanup/)
+   - [5.6.5. Clean Up Cognito and Networking Resources](5-7-testing-cleanup/5-7-5-auth-cleanup/)
 
 ## Results and verification scope
 
@@ -102,7 +102,7 @@ The dashboard summarizes devices, operational status and alerts for administrato
 
 ### Sign-in and authentication
 
-Users authenticate before managing AWS data. The screen below shows the application before sign-in; Cognito and JWT configuration are covered in section 5.6.
+Users authenticate before managing AWS data. The screen below shows the application before sign-in; Cognito and JWT configuration are covered in section 5.5.
 
 {{< photo src="workshop/evidence/24_Man_hinh_chua_dang_nhap.png" alt="NetMon before sign-in; not the Cognito Hosted UI." caption="Interface test – mock API. NetMon before sign-in; not the Cognito Hosted UI." >}}
 

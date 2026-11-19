@@ -1,5 +1,5 @@
 ---
-title: "5.7.2. Kiểm tra chi phí và sao lưu minh chứng"
+title: "5.6.2. Kiểm tra chi phí và sao lưu minh chứng"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 2

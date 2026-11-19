@@ -1,5 +1,5 @@
 ---
-title: "5.7.5. Dọn dẹp Cognito và tài nguyên mạng"
+title: "5.6.5. Dọn dẹp Cognito và tài nguyên mạng"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 5

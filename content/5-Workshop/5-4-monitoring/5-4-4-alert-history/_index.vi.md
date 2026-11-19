@@ -1,5 +1,5 @@
 ---
-title: "5.4.4. Lambda lưu lịch sử cảnh báo vào DynamoDB"
+title: "5.3.4. Lambda lưu lịch sử cảnh báo vào DynamoDB"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 4

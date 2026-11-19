@@ -1,5 +1,5 @@
 ---
-title: "5.7.1. Test from the UI to CloudWatch/DynamoDB"
+title: "5.6.1. Test from the UI to CloudWatch/DynamoDB"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1
@@ -50,7 +50,7 @@ Use small test data and avoid heavy EC2 load. Label simulations as demo mode. If
 
 ## Interface evidence on November 18, 2026
 
-TEST005 scenario: add a simulated switch with 95% CPU/RAM, observe its warning label, view details, open the edit form, confirm deletion and check that the list returns to five devices. Browser history records the add/delete actions. See Figures 60–66 and 68 in section 5.6.5. Figure 70 flags Router-A002 above the threshold but does not confirm SNS email delivery. Verify DynamoDB records, API responses and email separately before declaring end-to-end success.
+TEST005 scenario: add a simulated switch with 95% CPU/RAM, observe its warning label, view details, open the edit form, confirm deletion and check that the list returns to five devices. Browser history records the add/delete actions. See Figures 60–66 and 68 in section 5.5.5. Figure 70 flags Router-A002 above the threshold but does not confirm SNS email delivery. Verify DynamoDB records, API responses and email separately before declaring end-to-end success.
 
 ## Related evidence screenshots
 

@@ -1,5 +1,5 @@
 ---
-title: "5.7.3. Dọn dẹp CloudWatch, SNS và EventBridge"
+title: "5.6.3. Dọn dẹp CloudWatch, SNS và EventBridge"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 3

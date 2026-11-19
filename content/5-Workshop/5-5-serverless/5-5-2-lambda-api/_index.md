@@ -1,5 +1,5 @@
 ---
-title: "5.5.2. Build the netmon-api Python Lambda"
+title: "5.4.2. Build the netmon-api Python Lambda"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 2

@@ -1,5 +1,5 @@
 ---
-title: "5.2.1. AWS Sign-in and Region"
+title: "5.1.1. AWS Sign-in and Region"
 date: 2026-11-11T00:00:00+07:00
 draft: false
 weight: 1
@@ -31,7 +31,7 @@ Select the correct `us-east-1` Region, verify AWS Console access, and create bud
 
 ## NetMon environment conventions
 
-Use the group's AWS account and `us-east-1` for EC2, CloudWatch, Lambda, API Gateway, DynamoDB and Cognito. IAM and Billing have a different scope from regional services. Record resource names and the API URL for frontend configuration; never store access keys or passwords in source code. Section 5.2.3 covers Budgets in detail.
+Use the group's AWS account and `us-east-1` for EC2, CloudWatch, Lambda, API Gateway, DynamoDB and Cognito. IAM and Billing have a different scope from regional services. Record resource names and the API URL for frontend configuration; never store access keys or passwords in source code. Section 5.1.3 covers Budgets in detail.
 
 
 [← Back to chapter](../)
