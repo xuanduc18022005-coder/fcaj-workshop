@@ -31,7 +31,7 @@ summaryLength = 40
 
 [languages]
   [languages.vi]
-    title = "Báo cáo thực tập - Tran Xuan Duc"
+    title = "Báo cáo thực tập - Trần Xuân Đức"
     languageCode = "vi-VN"
     label = "Tiếng Việt"
     weight = 1
