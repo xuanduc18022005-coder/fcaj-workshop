@@ -6,8 +6,6 @@ weight: 5
 translationKey: "workshop"
 ---
 
-> Workshop kỹ thuật dùng chung của nhóm NetMon Cloud, đối chiếu với [báo cáo của Nguyễn Tùng Dương](https://tunduncode.github.io/nguyentungduong-fcj-report/vi/5-workshop/). Các ảnh và cấu hình phản ánh từng thời điểm triển khai.
-
 ## Tổng quan
 
 NetMon là hệ thống quản lý và giám sát hạ tầng mạng doanh nghiệp vừa và nhỏ trên AWS, kết hợp hạ tầng EC2 với các dịch vụ Serverless. Workshop trình bày quy trình nhóm triển khai tại Region `us-east-1`, từ chuẩn bị tài khoản, xây dựng mạng, thu thập chỉ số, thiết kế API, xác thực người dùng đến vận hành giao diện và kiểm thử.
