@@ -1,62 +1,58 @@
 +++
-title = "5.4.2. Create CloudWatch alarms and SNS email"
+title = "5.4.2. Create CloudWatch Alarms and SNS Email"
 weight = 2
-translationKey = "ws-3-2"
+translationKey = "ws-shared-5-4-2-alarms-sns"
 +++
 
-## Configure SNS
+## Objective
 
-1. Open SNS → Topics → Create topic → Standard, or reuse an existing topic.
-2. Create an Email subscription and confirm it using the received email.
-3. Add the topic ARN to the monitor and SNS status API's `SNS_TOPIC_ARN`. Grant Publish to the monitor and topic/subscription read permissions to the API. Configure the CloudWatch alarm action for EC2.
-4. Set independent CPU/RAM thresholds through the UI or NetworkSettings. The monitor evaluates threshold crossings on synthetic devices and records handling status. Use `forcePeak` / `forceNormal` only on test devices, never to change real EC2 data.
+Create CPU, memory, and disk alarms and use SNS to send notifications when configured thresholds are exceeded.
+
+## Create an SNS Topic
+
+1. Go to **Amazon SNS → Topics → Create topic**, select Standard, and name it `netmon-alerts`.
+2. Open the topic and choose **Create subscription**. Select `Email` and provide the recipient address.
+
+3. Open the AWS SNS confirmation message and select **Confirm subscription**. A `Pending confirmation` subscription cannot receive notifications.
+
+{{< netmonimg src="images/netmon-workshop/25-sns-new-subscription-confirmed.png" alt="Confirmed SNS subscription" caption="Figure 25 – Confirmed SNS subscription" >}}
+
+{{< netmonimg src="images/netmon-workshop/26-sns-subscriptions-confirmed-list.png" alt="SNS subscription list" caption="Figure 26 – SNS subscription list" >}}
+
+{{< netmonimg src="images/netmon-workshop/27-sns-netmon-alerts-new-email-confirmed.png" alt="SNS netmon-alerts with confirmed email" caption="Figure 27 – SNS netmon-alerts with confirmed email" >}}
+
+4. Use **Publish message** to send a test message; check Inbox and Spam. The group previously confirmed successful test email delivery.
+
+## CloudWatch alarms
+
+| Alarm | Metric | Lab threshold |
+|---|---|---|
+| `netmon-cpu-high-80` | `AWS/EC2 / CPUUtilization` | Greater than 80% |
+| `netmon-ram-high-80` | `NetMon/EC2 / mem_used_percent` | Greater than 80% |
+| `netmon-disk-high-85` | `NetMon/EC2 / disk_used_percent` | Greater than 85% |
+
+For each one, select **CloudWatch → Alarms → Create alarm → Select metric**. Choose **Average**, **5 minutes**, **1 out of 1 datapoint**, and send the `In alarm` notification to `netmon-alerts`. These values are lab settings, not universal operational thresholds.
 
 ## Verification
 
-Check NetworkAlerts when the monitor works and confirm actual email receipt and timestamp. GET `/sns/status` only checks configuration/subscriptions. Restore normal simulated load after testing. [Amazon SNS](https://docs.aws.amazon.com/sns/latest/dg/sns-getting-started.html).
+In **CloudWatch → Alarms**, review all three alarms and their `OK`, `ALARM`, or `INSUFFICIENT_DATA` state. An `OK` state only indicates that the monitored metric is not breaching at that moment; it does not prove the entire SNS or EventBridge flow works.
 
-## Create an EC2 alarm
+## EC2 and simulated-device alerts
 
-1. CloudWatch → Alarms → All alarms → Create alarm → Select metric.
-2. Select `AWS/EC2` → Per-Instance Metrics → CPUUtilization; for RAM use `NetMon/EC2`, mem_used_percent and the correct InstanceId.
-3. Choose Average and an appropriate period, threshold and evaluation periods. Configure In alarm notification to the confirmed SNS topic.
-4. Give the alarm a clear name, preview it and create it. Inspect OK/ALARM/INSUFFICIENT_DATA and History; missing data does not establish a broken alarm.
+The pictured alarms show the initial EC2 configuration (80% CPU/memory and 85% disk). UI thresholds may be configured separately for simulated devices; they do not change CloudWatch alarms without an alarm-update API. To alert above 90%, adjust the appropriate alert source and confirm whether the comparator is `>` or `>=`.
 
-CloudWatch EC2 emails use a separate path. The simulation monitor writes NetworkAlerts; EC2 alarms are not automatically persisted there. Test email only in an agreed lab or use controlled SNS Publish message.
+CloudWatch evaluates by period and datapoints; email is not guaranteed immediately when a value crosses the threshold. Successful SNS Publish message confirms the email channel. To test automatic delivery, trigger a controlled threshold breach and compare the event record, timestamp, and email. Avoid repeat notifications for one incident on every UI refresh.
 
+---
 
-## AWS Console walkthrough and evidence
+## Related evidence screenshots
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+{{< netmonimg src="images/netmon-workshop/21-cloudwatch-alarms-list.png" alt="Three CloudWatch alarms" caption="Figure 21 – Three CloudWatch alarms" >}}
 
-### Step 1
+{{< netmonimg src="images/netmon-workshop/22-cloudwatch-disk-high-85-details.png" alt="Disk usage alarm at 85%" caption="Figure 22 – Disk usage alarm at 85%" >}}
 
-CloudWatch → Alarms → All alarms: compare team alarms and current states.
+{{< netmonimg src="images/netmon-workshop/23-cloudwatch-ram-high-80-details.png" alt="RAM usage alarm at 80%" caption="Figure 23 – RAM usage alarm at 80%" >}}
 
-{{< photo src="workshop/aws-console/21-cloudwatch-alarms-list.png" alt="CloudWatch → Alarms → All alarms: compare team alarms and current states." caption="Configuration evidence from the team." >}}
+{{< netmonimg src="images/netmon-workshop/24-cloudwatch-cpu-high-80-details.png" alt="CPU usage alarm at 80%" caption="Figure 24 – CPU usage alarm at 80%" >}}
 
-### Step 2
-
-Select netmon-cpu-high-80. The earlier team screenshot uses 80%; inspect the threshold and notification action.
-
-{{< photo src="workshop/aws-console/24-cloudwatch-cpu-high-80-details.png" alt="Select netmon-cpu-high-80. The earlier team screenshot uses 80%; inspect the threshold and notification action." caption="Configuration evidence from the team." >}}
-
-### Step 3
-
-Select netmon-ram-high-80; check mem_used_percent and the correct InstanceId.
-
-{{< photo src="workshop/aws-console/23-cloudwatch-ram-high-80-details.png" alt="Select netmon-ram-high-80; check mem_used_percent and the correct InstanceId." caption="Configuration evidence from the team." >}}
-
-### Step 4
-
-Select netmon-disk-high-85; inspect disk_used_percent and its dimensions.
-
-{{< photo src="workshop/aws-console/22-cloudwatch-disk-high-85-details.png" alt="Select netmon-disk-high-85; inspect disk_used_percent and its dimensions." caption="Configuration evidence from the team." >}}
-
-**Related interface screenshots:** [Alerts and incident handling](../../#netmon-alerts) · [System settings and SNS](../../#netmon-settings).
-
-### Verify the SNS email subscription
-
-Amazon SNS → Topics → `netmon-alerts` → Subscriptions → select the subscription. Verify Protocol = Email and Status = Confirmed. Leave the filter policy empty to receive all messages. This records the state at capture time, not proof of new email delivery.
-
-{{< photo src="workshop/aws-console/25-sns-new-subscription-confirmed.png" alt="Confirmed SNS subscription in the team screenshot." caption="Confirmed SNS subscription in the team screenshot." >}}
+[← Back to chapter](../)
