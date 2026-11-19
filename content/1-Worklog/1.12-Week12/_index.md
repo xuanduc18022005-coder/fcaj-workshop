@@ -14,7 +14,7 @@ translationKey = "week-12"
 
 | Date | Activity | Source / reference |
 |---|---|---|
-| 09/11/2026 | Review login, device CRUD, CPU/RAM, CloudWatch/SNS alerts and incident history. | — |
+| 07/11/2026 | Review login, device CRUD, CPU/RAM, CloudWatch/SNS alerts and incident history. | — |
 | 11/11/2026 | Compile architecture diagrams, AWS screenshots, 12 worklogs and workshop notes. | — |
 | 14/11/2026 | Review the Hugo site, GitHub Pages publication and feature demo script. | [Hugo – GitHub Pages](https://gohugo.io/host-and-deploy/deploy-to-github-pages/) |
 

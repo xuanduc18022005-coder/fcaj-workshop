@@ -13,9 +13,9 @@ translationKey = "week-10"
 
 | Ngày | Công việc | Nguồn tài liệu |
 |---|---|---|
-| 17/10/2026 | Tổng hợp kiến thức về AI Security, AWS Landing Zone, Data Engineering và Cloud Network Security từ FCAJ Community Day; liên hệ với đề tài nhóm. | [FCAJ Community Day Hà Nội](https://luma.com/q9n86lwl) |
-| 19/10/2026 | Tìm hiểu CloudWatch Metrics và triển khai Alarm giám sát EC2; phân biệt dữ liệu EC2 thực với số liệu CPU/RAM mô phỏng. | [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html) |
-| 22/10/2026 | Triển khai SNS Topic và email subscription; xây dựng luồng lưu cảnh báo vào NetworkAlerts với trạng thái NEW/HANDLED, chuẩn bị tình huống kiểm thử. | [Amazon SNS](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) |
+| 24/10/2026 | Tổng hợp kiến thức về AI Security, AWS Landing Zone, Data Engineering và Cloud Network Security từ FCAJ Community Day ngày 17/10; liên hệ với đề tài nhóm. | [FCAJ Community Day Hà Nội](https://luma.com/q9n86lwl) |
+| 26/10/2026 | Tìm hiểu CloudWatch Metrics và triển khai Alarm giám sát EC2; phân biệt dữ liệu EC2 thực với số liệu CPU/RAM mô phỏng. | [CloudWatch Alarms](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Alarms.html) |
+| 29/10/2026 | Triển khai SNS Topic và email subscription; xây dựng luồng lưu cảnh báo vào NetworkAlerts với trạng thái NEW/HANDLED, chuẩn bị tình huống kiểm thử. | [Amazon SNS](https://docs.aws.amazon.com/sns/latest/dg/welcome.html) |
 
 ## Kết quả đạt được tuần 10:
 

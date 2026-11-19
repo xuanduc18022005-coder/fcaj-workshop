@@ -17,7 +17,7 @@ translationKey = "proposal"
 **Implementation format:** Group project (3 students):
 
 - **Nguyễn Tùng Dương** – VPC, EC2 and network infrastructure security.
-- **Trần Xuân Đức** – AWS Lambda, API Gateway, DynamoDB and device management functions.
+- **Tran Xuan Duc** – AWS Lambda, API Gateway, DynamoDB and device management functions.
 - **Lê Mạnh Quân** – CloudWatch, SNS, user interface and testing.
 
 **Environment:** AWS Region us-east-1; HTML, CSS and JavaScript interface; development using Visual Studio Code.
@@ -109,12 +109,12 @@ Users can configure CPU/RAM thresholds, automatic browser refresh and simulation
 
 | Period | Activities | Responsibility |
 |---|---|---|
-| 19/09–24/09/2026 | Agree on requirements, assign responsibilities, design architecture and data. | Whole team |
-| 03/10–08/10/2026 | Prepare VPC, subnets, EC2, security groups and IAM permissions. | Nguyễn Tùng Dương |
-| 10/10–15/10/2026 | Study and implement DynamoDB, Lambda and API Gateway; test CRUD. | Trần Xuân Đức |
-| 17/10–22/10/2026 | Implement CloudWatch, SNS, alert thresholds and monitoring interface. | Lê Mạnh Quân, with team support |
+| 03/10–08/10/2026 | Agree on requirements, assign responsibilities, design architecture and data. | Whole team |
+| 10/10–15/10/2026 | Prepare VPC, subnets, EC2, security groups and IAM permissions. | Nguyễn Tùng Dương |
+| 17/10–22/10/2026 | Study and implement DynamoDB, Lambda and API Gateway; test CRUD. | Tran Xuan Duc |
+| 24/10–29/10/2026 | Implement CloudWatch, SNS, alert thresholds and monitoring interface. | Lê Mạnh Quân, with team support |
 | 31/10–05/11/2026 | Integrate APIs, authentication, simulation, EC2 metrics and alert history. | Whole team |
-| 09/11–14/11/2026 | Test integration, resolve issues, finalize report and prepare demo. | Whole team |
+| 07/11–14/11/2026 | Test integration, resolve issues, finalize report and prepare demo. | Whole team |
 
 ### 6. Budget Estimation
 

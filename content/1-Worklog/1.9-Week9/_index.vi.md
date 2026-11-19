@@ -14,9 +14,9 @@ translationKey = "week-09"
 
 | Ngày | Công việc | Nguồn tài liệu |
 |---|---|---|
-| 10/10/2026 | Tìm hiểu DynamoDB và thiết kế bảng NetworkDevices với khóa deviceId, thông tin thiết bị và trạng thái. | [Amazon DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html) |
-| 12/10/2026 | Tìm hiểu và triển khai Lambda xử lý các chức năng CRUD, cấu hình IAM Role để truy cập DynamoDB. | [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/getting-started.html) |
-| 15/10/2026 | Triển khai HTTP API với API Gateway, cấu hình các tuyến /devices và /devices/{id}, kiểm tra dữ liệu trả về bằng HTML/JavaScript. | [API Gateway + Lambda + DynamoDB](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-dynamo-db.html) |
+| 17/10/2026 | Tìm hiểu DynamoDB và thiết kế bảng NetworkDevices với khóa deviceId, thông tin thiết bị và trạng thái. | [Amazon DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html) |
+| 19/10/2026 | Tìm hiểu và triển khai Lambda xử lý các chức năng CRUD, cấu hình IAM Role để truy cập DynamoDB. | [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/getting-started.html) |
+| 22/10/2026 | Triển khai HTTP API với API Gateway, cấu hình các tuyến /devices và /devices/{id}, kiểm tra dữ liệu trả về bằng HTML/JavaScript. | [API Gateway + Lambda + DynamoDB](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-dynamo-db.html) |
 
 ## Kết quả đạt được tuần 9:
 

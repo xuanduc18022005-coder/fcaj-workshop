@@ -109,12 +109,12 @@ Cho phép thiết lập ngưỡng CPU/RAM, chu kỳ tự tải giao diện và c
 
 | Thời gian | Công việc | Phụ trách |
 |---|---|---|
-| 19/09–24/09/2026 | Thống nhất yêu cầu, phân công nhiệm vụ, thiết kế kiến trúc và dữ liệu. | Cả nhóm |
-| 03/10–08/10/2026 | Chuẩn bị VPC, subnet, EC2, Security Group và quyền IAM. | Nguyễn Tùng Dương |
-| 10/10–15/10/2026 | Tìm hiểu và triển khai DynamoDB, Lambda và API Gateway; kiểm thử CRUD. | Trần Xuân Đức |
-| 17/10–22/10/2026 | Triển khai CloudWatch, SNS, ngưỡng cảnh báo và giao diện giám sát. | Lê Mạnh Quân, phối hợp cả nhóm |
+| 03/10–08/10/2026 | Thống nhất yêu cầu, phân công nhiệm vụ, thiết kế kiến trúc và dữ liệu. | Cả nhóm |
+| 10/10–15/10/2026 | Chuẩn bị VPC, subnet, EC2, Security Group và quyền IAM. | Nguyễn Tùng Dương |
+| 17/10–22/10/2026 | Tìm hiểu và triển khai DynamoDB, Lambda và API Gateway; kiểm thử CRUD. | Trần Xuân Đức |
+| 24/10–29/10/2026 | Triển khai CloudWatch, SNS, ngưỡng cảnh báo và giao diện giám sát. | Lê Mạnh Quân, phối hợp cả nhóm |
 | 31/10–05/11/2026 | Tích hợp API, xác thực, mô phỏng, chỉ số EC2 và lịch sử cảnh báo. | Cả nhóm |
-| 09/11–14/11/2026 | Kiểm thử tích hợp, khắc phục lỗi, hoàn thiện báo cáo và chuẩn bị demo. | Cả nhóm |
+| 07/11–14/11/2026 | Kiểm thử tích hợp, khắc phục lỗi, hoàn thiện báo cáo và chuẩn bị demo. | Cả nhóm |
 
 ### 6. Dự toán chi phí
 

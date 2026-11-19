@@ -14,7 +14,7 @@ translationKey = "week-12"
 
 | Ngày | Công việc | Nguồn tài liệu |
 |---|---|---|
-| 09/11/2026 | Thử quy trình đăng nhập, CRUD thiết bị, dữ liệu CPU/RAM, cảnh báo CloudWatch/SNS và nhật ký xử lý. | — |
+| 07/11/2026 | Thử quy trình đăng nhập, CRUD thiết bị, dữ liệu CPU/RAM, cảnh báo CloudWatch/SNS và nhật ký xử lý. | — |
 | 11/11/2026 | Tổng hợp sơ đồ kiến trúc, ảnh minh chứng AWS, 12 trang Worklog và nội dung Workshop. | — |
 | 14/11/2026 | Rà soát website Hugo, GitHub Pages và kịch bản video demo các chức năng chính. | [Hugo – GitHub Pages](https://gohugo.io/host-and-deploy/deploy-to-github-pages/) |
 

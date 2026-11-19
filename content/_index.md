@@ -6,7 +6,7 @@ translationKey = "home"
 
 ## Student Information:
 
-**Full Name:** Trần Xuân Đức
+**Full Name:** Tran Xuan Duc
 
 **Phone Number:** [0345305418](tel:+84345305418)
 

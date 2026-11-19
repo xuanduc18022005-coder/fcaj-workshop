@@ -14,9 +14,9 @@ translationKey = "week-08"
 
 | Ngày | Công việc | Nguồn tài liệu |
 |---|---|---|
-| 03/10/2026 | Kiểm tra kế hoạch VPC, Subnet, Route Table, Internet Gateway và Security Group. | [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) · [VPC Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) |
-| 05/10/2026 | Cùng nhóm xem cấu hình EC2 dùng mô phỏng và giám sát trạng thái máy chủ. | [Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html) |
-| 08/10/2026 | Tổng hợp quyền cần dùng cho Lambda, DynamoDB, CloudWatch và SNS. | [Lambda execution role](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html) |
+| 10/10/2026 | Kiểm tra kế hoạch VPC, Subnet, Route Table, Internet Gateway và Security Group. | [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html) · [VPC Security Groups](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) |
+| 12/10/2026 | Cùng nhóm xem cấu hình EC2 dùng mô phỏng và giám sát trạng thái máy chủ. | [Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html) |
+| 15/10/2026 | Tổng hợp quyền cần dùng cho Lambda, DynamoDB, CloudWatch và SNS. | [Lambda execution role](https://docs.aws.amazon.com/lambda/latest/dg/lambda-intro-execution-role.html) |
 
 ## Kết quả đạt được tuần 8:
 
