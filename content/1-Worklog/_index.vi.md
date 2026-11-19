@@ -6,7 +6,7 @@ translationKey = "worklog"
 
 Dưới đây là nhật ký công việc chi tiết tổng hợp quá trình thực tập 12 tuần của tôi. Nội dung ghi lại kiến thức AWS, các bài thực hành, sự kiện cộng đồng, tiến độ dự án nhóm và công việc hoàn thiện báo cáo trong suốt chương trình thực tập First Cloud AI Journey:
 
-## Tiến Độ Theo Tuần
+## Tiến độ theo tuần
 
 **Tuần 1:** [Khởi tạo tài khoản AWS, bảo mật và làm quen AWS Console](./1.1-week1/)
 
@@ -22,12 +22,12 @@ Dưới đây là nhật ký công việc chi tiết tổng hợp quá trình th
 
 **Tuần 7:** [Lập kế hoạch nhóm, phân tích yêu cầu và thiết kế hệ thống giám sát mạng](./1.7-week7/)
 
-**Tuần 8:** [Chuẩn bị hạ tầng VPC, EC2 và kết nối nhóm](./1.8-week8/)
+**Tuần 8:** [Chuẩn bị hạ tầng VPC, EC2 và môi trường làm việc nhóm](./1.8-week8/)
 
 **Tuần 9:** [Tìm hiểu và triển khai AWS Lambda, API Gateway và DynamoDB](./1.9-week9/)
 
 **Tuần 10:** [Tìm hiểu và triển khai CloudWatch, SNS và quản lý cảnh báo](./1.10-week10/)
 
-**Tuần 11:** [Tích hợp giao diện, thử nghiệm và hoàn thiện gần cuối](./1.11-week11/)
+**Tuần 11:** [Tích hợp giao diện, kiểm thử và hoàn thiện hệ thống](./1.11-week11/)
 
 **Tuần 12:** [Hoàn thành dự án và chuẩn bị báo cáo, demo](./1.12-week12/)
