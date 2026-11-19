@@ -1,80 +1,50 @@
 +++
-title = "5.6.1. Create a Cognito user pool and web client"
+title = "5.6.1. Create a Cognito User Pool and Web Client"
 weight = 1
-translationKey = "ws-5-1"
+translationKey = "ws-shared-5-6-1-cognito"
 +++
 
 ## Objective
 
-Use an Amazon Cognito user pool to sign in to NetMon Cloud and issue an access token to the frontend. Cognito authenticates users; API authorization is covered in section 5.6.2.
+Create a managed sign-in flow for NetMon administrators with Amazon Cognito rather than allowing unauthenticated browser access to the APIs.
 
-## Implementation steps
+## Steps
 
-1. Open Amazon Cognito in `us-east-1`. Inspect the existing user pool or create one for testing.
-2. In App clients, verify or create a public app client (no client secret). Configure managed login and the user pool domain.
-3. Select the OAuth 2.0 authorization code flow with PKCE. Set the exact callback URL to `http://localhost:5500/` for Live Server.
-4. Create a resource server with identifier `netmon-api` and scopes `read` and `write`. Allow the corresponding scopes on the app client, along with `openid` and `email`.
-5. Create or verify a test user. In `auth.js`, match the domain, app client ID and redirect URI to the active user pool. Never publish passwords, tokens or AWS keys.
+1. Open **Amazon Cognito → User pools**. Create a pool or select the existing one in `us-east-1`.
 
-## Sign-in flow
+{{< netmonimg src="images/netmon-workshop/43-cognito-user-pool-overview.png" alt="Cognito user-pool overview" caption="Figure 43 – Cognito user-pool overview" >}}
 
-User → Cognito managed login → authorization code → frontend exchanges code and PKCE verifier for an access token → API Gateway.
+2. Create an **App client** for a **Single-page application (SPA)** and name it `netmon-web-client`.
 
-NetMon's `auth.js` validates callback `state`, calls `/oauth2/token`, and stores the access token and its expiry in `sessionStorage`. Sign in again when the session expires. Do not substitute an ID token for a scoped API access token.
+{{< netmonimg src="images/netmon-workshop/44-cognito-app-client-netmon-web-client.png" alt="Cognito netmon-web-client app client" caption="Figure 44 – Cognito netmon-web-client app client" >}}
+
+3. Use **email** as the sign-in identifier, and keep self-registration disabled if only approved team members should have accounts.
+
+4. Set **Allowed callback URLs** to `http://localhost:5500/`. If your frontend runs on another port, update the callback and CORS origin accordingly.
+
+5. Enable **Authorization code grant** and configure a Cognito domain for Managed Login. Use **Authorization Code + PKCE** for the SPA; never embed a client secret in JavaScript.
+
+{{< netmonimg src="images/netmon-workshop/45-cognito-resource-server-netmon-api-scopes.png" alt="Resource server netmon-api and two scopes" caption="Figure 45 – Resource server netmon-api and two scopes" >}}
+
+{{< netmonimg src="images/netmon-workshop/46-cognito-domain-managed-login-issuer.png" alt="Cognito domain and issuer" caption="Figure 46 – Cognito domain and issuer" >}}
+
+{{< netmonimg src="images/netmon-workshop/47-cognito-app-client-managed-login-pages-oauth-scopes.png" alt="Cognito managed-login and OAuth configuration" caption="Figure 47 – Cognito managed-login and OAuth configuration" >}}
+
+{{< netmonimg src="images/netmon-workshop/48-cognito-managed-login-sign-in.png" alt="Managed-login sign-in page" caption="Figure 48 – Managed-login sign-in page" >}}
+
+6. Open **User management → Users → Create user** and add an approved email account. A user created with a temporary password must change it during the first sign-in.
+
+{{< netmonimg src="images/netmon-workshop/49-cognito-users-confirmed-enabled.png" alt="Two verified Cognito accounts" caption="Figure 49 – Two verified Cognito accounts" >}}
 
 ## Verification
 
-Open NetMon at `http://localhost:5500/` and choose AWS sign-in. Cognito should return to the configured callback after login. Configure the JWT authorizer before testing API access. These are instructions and expected results, not verified live console settings.
+After sign-in, Cognito redirects to the callback URL with `?code=...`. A local server must be listening at `localhost:5500`, and the frontend needs PKCE logic to exchange the code for tokens. `ERR_CONNECTION_REFUSED` typically means the local server is not running, not that Lambda is down.
 
-## References
+> Authorization codes and tokens are temporary sensitive data and should not appear in published screenshots.
 
-- [Authorization code and PKCE](https://docs.aws.amazon.com/cognito/latest/developerguide/using-pkce-in-authorization-code.html)
-- [Resource servers and custom scopes](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-define-resource-servers.html)
+## NetMon accounts
 
-## Console configuration checklist
+The user pool contains application users, not IAM users. Grant accounts only to authorized device managers. For `FORCE_CHANGE_PASSWORD`, complete the first-time password change; if the localhost redirect fails, first serve the correct directory containing `index.html`. Match callback and sign-out URLs to the deployment environment; do not automatically use the Hugo report website as the callback.
 
-| Field | Configuration |
-|---|---|
-| App type | Public client; no browser client secret |
-| OAuth grant | Authorization code grant |
-| Callback URL | http://localhost:5500/ |
-| Resource server identifier | netmon-api |
-| Custom scopes | netmon-api/read; netmon-api/write |
-| Standard scopes | openid; email |
 
-Create an authorized lab user under User management → Users. Complete the first-login challenge if a temporary password is issued; do not publish credentials. Verify the Managed login domain against `auth.js`. Record pool and client IDs privately and mask them in report screenshots.
-
-## AWS Console walkthrough and evidence
-
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
-
-### Step 1
-
-Cognito → User pools → select the NetMon pool; inspect User pool overview.
-
-{{< photo src="workshop/aws-console/43-cognito-user-pool-overview.png" alt="Cognito → User pools → select the NetMon pool; inspect User pool overview." caption="Configuration evidence from the team." >}}
-
-### Step 2
-
-App clients → netmon-web-client: verify public-client type and token configuration.
-
-{{< photo src="workshop/aws-console/44-cognito-app-client-netmon-web-client.png" alt="App clients → netmon-web-client: verify public-client type and token configuration." caption="Configuration evidence from the team." >}}
-
-### Step 3
-
-Resource servers → netmon-api: inspect read and write scopes.
-
-{{< photo src="workshop/aws-console/45-cognito-resource-server-netmon-api-scopes.png" alt="Resource servers → netmon-api: inspect read and write scopes." caption="Configuration evidence from the team." >}}
-
-### Step 4
-
-Domain: verify the managed-login domain used in auth.js.
-
-{{< photo src="workshop/aws-console/46-cognito-domain-managed-login-issuer.png" alt="Domain: verify the managed-login domain used in auth.js." caption="Configuration evidence from the team." >}}
-
-### Step 5
-
-App client → Login pages: check callback URL, OAuth grant and allowed scopes.
-
-{{< photo src="workshop/aws-console/47-cognito-app-client-managed-login-pages-oauth-scopes.png" alt="App client → Login pages: check callback URL, OAuth grant and allowed scopes." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)

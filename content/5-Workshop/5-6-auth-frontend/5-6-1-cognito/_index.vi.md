@@ -1,80 +1,50 @@
 +++
 title = "5.6.1. Tạo Cognito User Pool và Web Client"
 weight = 1
-translationKey = "ws-5-1"
+translationKey = "ws-shared-5-6-1-cognito"
 +++
 
 ## Mục tiêu
 
-Sử dụng Amazon Cognito User Pool để đăng nhập vào NetMon Cloud và cấp access token cho giao diện. Cognito xác thực người dùng; việc kiểm tra quyền gọi API được thực hiện tại mục 5.6.2.
+Tạo cơ chế đăng nhập cho người quản lý NetMon bằng Amazon Cognito, thay vì để giao diện truy cập API không kiểm soát.
 
-## Các bước thực hiện
+## Các bước
 
-1. Vào Amazon Cognito tại region `us-east-1`, mở User Pool hiện có hoặc tạo User Pool cho môi trường thử nghiệm.
-2. Trong App clients, kiểm tra hoặc tạo public app client (không có client secret). Cấu hình managed login và domain của User Pool.
-3. Chọn luồng OAuth 2.0 Authorization Code, sử dụng PKCE. Khai báo callback URL chính xác là `http://localhost:5500/` cho môi trường Live Server.
-4. Tạo resource server với identifier `netmon-api` và hai scope `read`, `write`. Cho phép các scope tương ứng ở app client, cùng `openid` và `email`.
-5. Tạo hoặc kiểm tra người dùng thử nghiệm. Trong `auth.js`, đối chiếu domain, app client ID và redirect URI với giá trị của User Pool đang dùng. Không công khai mật khẩu, token hay khóa AWS.
+1. Mở **Amazon Cognito → User pools**. Tạo User Pool hoặc chọn pool đã tạo ở Region `us-east-1`.
 
-## Luồng đăng nhập
+{{< netmonimg src="images/netmon-workshop/43-cognito-user-pool-overview.png" alt="Tổng quan Cognito User Pool" caption="Ảnh 43 – Tổng quan Cognito User Pool" >}}
 
-Người dùng → Cognito managed login → authorization code → giao diện đổi code và PKCE verifier lấy access token → gọi API Gateway.
+2. Tạo **App client** cho loại **Single-page application (SPA)**, đặt tên `netmon-web-client`.
 
-Trong mã NetMon, `auth.js` kiểm tra `state` khi nhận callback, gọi `/oauth2/token` và lưu access token cùng thời hạn trong `sessionStorage`. Khi hết hạn, giao diện cần đăng nhập lại. Không dùng ID token thay access token để gọi API có scope.
+{{< netmonimg src="images/netmon-workshop/44-cognito-app-client-netmon-web-client.png" alt="Cognito App Client netmon-web-client" caption="Ảnh 44 – Cognito App Client netmon-web-client" >}}
+
+3. Chọn đăng nhập bằng **email**, không mở self-registration nếu đây là hệ thống chỉ dành cho thành viên được cấp quyền.
+
+4. Đặt **Allowed callback URLs** thành `http://localhost:5500/`. Nếu giao diện chạy ở port khác, phải cập nhật callback và origin tương ứng.
+
+5. Chọn **Authorization code grant** và cấu hình Cognito domain cho Managed Login. Với SPA, sử dụng **Authorization Code + PKCE**, không nhúng client secret vào JavaScript.
+
+{{< netmonimg src="images/netmon-workshop/45-cognito-resource-server-netmon-api-scopes.png" alt="Resource Server netmon-api và hai scopes" caption="Ảnh 45 – Resource Server netmon-api và hai scopes" >}}
+
+{{< netmonimg src="images/netmon-workshop/46-cognito-domain-managed-login-issuer.png" alt="Cognito Domain và Issuer" caption="Ảnh 46 – Cognito Domain và Issuer" >}}
+
+{{< netmonimg src="images/netmon-workshop/47-cognito-app-client-managed-login-pages-oauth-scopes.png" alt="Cognito Managed Login và cấu hình OAuth" caption="Ảnh 47 – Cognito Managed Login và cấu hình OAuth" >}}
+
+{{< netmonimg src="images/netmon-workshop/48-cognito-managed-login-sign-in.png" alt="Giao diện đăng nhập Managed Login" caption="Ảnh 48 – Giao diện đăng nhập Managed Login" >}}
+
+6. Vào **User management → Users → Create user**, tạo tài khoản email được nhóm cho phép sử dụng. Khi đăng nhập lần đầu bằng mật khẩu tạm thời, người dùng cần đổi mật khẩu.
+
+{{< netmonimg src="images/netmon-workshop/49-cognito-users-confirmed-enabled.png" alt="Hai tài khoản được xác minh trong Cognito" caption="Ảnh 49 – Hai tài khoản được xác minh trong Cognito" >}}
 
 ## Kiểm tra
 
-Mở NetMon tại `http://localhost:5500/` và chọn Đăng nhập AWS. Sau khi đăng nhập, Cognito phải chuyển về đúng callback. Tiếp tục cấu hình JWT Authorizer trước khi kiểm thử API. Đây là hướng dẫn và kết quả mong đợi, chưa xác nhận cấu hình thực tế trên Console.
+Sau khi đăng nhập thành công, Cognito sẽ chuyển hướng về callback URL với `?code=...`. Trang frontend phải đang chạy tại `localhost:5500` và xử lý PKCE để đổi code lấy token. Nếu hiện `ERR_CONNECTION_REFUSED`, thường là chưa có server local đang lắng nghe ở cổng này, không phải Lambda hỏng.
 
-## Tài liệu tham khảo
+> Mã `code` và token là dữ liệu nhạy cảm tạm thời; không đưa vào ảnh chụp báo cáo.
 
-- [Authorization Code và PKCE](https://docs.aws.amazon.com/cognito/latest/developerguide/using-pkce-in-authorization-code.html)
-- [Resource server và custom scopes](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-define-resource-servers.html)
+## Tài khoản dùng trong NetMon
 
-## Các trường cần đối chiếu trong Console
+User Pool chứa người dùng ứng dụng, không phải IAM users. Chỉ cấp cho người được phép quản lý thiết bị. Nếu trạng thái `FORCE_CHANGE_PASSWORD`, hoàn tất đổi mật khẩu lần đầu; nếu quay về localhost không mở được, chạy đúng thư mục chứa `index.html` trước. Giữ callback và sign-out URL phù hợp với môi trường triển khai; không tự trỏ callback về website báo cáo Hugo.
 
-| Trường | Cấu hình |
-|---|---|
-| App type | Public client, không tạo secret cho browser |
-| OAuth grant | Authorization code grant |
-| Callback URL | http://localhost:5500/ |
-| Resource server identifier | netmon-api |
-| Custom scopes | netmon-api/read; netmon-api/write |
-| Standard scopes | openid; email |
 
-Trong User management → Users, tạo tài khoản lab bằng địa chỉ được phép sử dụng. Nếu có mật khẩu tạm thời, hoàn thành lần đăng nhập đầu theo Cognito; không đưa mật khẩu vào báo cáo. Kiểm tra phần Managed login/Domain để URL trong `auth.js` trùng domain. Ghi lại User Pool ID và Client ID trong cấu hình riêng, che khi chụp minh chứng.
-
-## Thao tác trên AWS Console và ảnh đối chiếu
-
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
-
-### Bước 1
-
-Cognito → User pools → chọn pool của NetMon; xem User pool overview.
-
-{{< photo src="workshop/aws-console/43-cognito-user-pool-overview.png" alt="Cognito → User pools → chọn pool của NetMon; xem User pool overview." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 2
-
-App clients → netmon-web-client: kiểm tra loại public client và thông số token.
-
-{{< photo src="workshop/aws-console/44-cognito-app-client-netmon-web-client.png" alt="App clients → netmon-web-client: kiểm tra loại public client và thông số token." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 3
-
-Resource servers → netmon-api: kiểm tra hai scope read và write.
-
-{{< photo src="workshop/aws-console/45-cognito-resource-server-netmon-api-scopes.png" alt="Resource servers → netmon-api: kiểm tra hai scope read và write." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 4
-
-Domain: xác nhận domain managed login được sử dụng trong auth.js.
-
-{{< photo src="workshop/aws-console/46-cognito-domain-managed-login-issuer.png" alt="Domain: xác nhận domain managed login được sử dụng trong auth.js." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 5
-
-App client → Login pages: đối chiếu callback URL, OAuth grant và allowed scopes.
-
-{{< photo src="workshop/aws-console/47-cognito-app-client-managed-login-pages-oauth-scopes.png" alt="App client → Login pages: đối chiếu callback URL, OAuth grant và allowed scopes." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)
