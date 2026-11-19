@@ -1,61 +1,56 @@
-+++
-title = "5.4.3. EventBridge Scheduler and device simulation"
-weight = 3
-translationKey = "ws-3-3"
-+++
+---
+title: "5.4.3. Route Alarm Changes with EventBridge"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 3
+---
 
 ## Objective
-Automatically update CPU/RAM for devices with `metricsSource=SIMULATED`, without overwriting EC2 metrics.
 
-## Implementation steps
+When a CloudWatch Alarm changes state, EventBridge invokes a Lambda function that stores alert history in DynamoDB for time tracking and incident handling.
 
-1. Complete the `NetworkDevices` and `NetworkSettings` tables in [5.5.1](../../5-5-serverless/5-5-1-dynamodb/). Create or open the `netmon-simulator` Lambda, using `netmon-simulator-deploy.zip` in `AWS_BACKEND_CODE`. Verify its handler and role permissions to read settings, scan devices and update the correct table.
-2. Open Amazon EventBridge → Scheduler → Schedules → Create schedule. Use a name such as `netmon-simulator-schedule`, `rate(1 minute)` and Flexible time window = Off. Set the target to AWS Lambda → `netmon-simulator`, with payload `{}` and an execution role allowed to invoke that function. Reuse existing schedules.
-3. In DynamoDB, verify `settingKey=simulation`, with `intervalMinutes` as a Number from 1–60 (default 5). Scheduler invokes every minute; the function updates only due devices based on `lastSimulatedAt`. The code scans up to 100 eligible simulated devices per run.
-4. In Lambda → Test, use the read-only event below to preview due devices. Do not use test events as the Scheduler payload.
+## Steps
+
+1. Ensure that the `NetworkAlerts` table exists with String partition key `eventId`.
+2. Create the Python Lambda `netmon-save-alert` and give its execution role `dynamodb:PutItem` on the `NetworkAlerts` table and CloudWatch Logs permissions.
+
+3. Open **Amazon EventBridge → Event buses → default → Rules → Create rule**. Name it `netmon-alarm-state-rule` on the `default` event bus.
+
+{{< netmonimg src="images/netmon-workshop/28-eventbridge-default-bus-rule-enabled.png" alt="EventBridge default bus and rule" caption="Figure 28 – EventBridge default bus and rule" >}}
+
+4. Choose **Custom pattern (JSON editor)** and enter:
+
+{{< netmonimg src="images/netmon-workshop/29-eventbridge-netmon-alarm-state-rule-pattern.png" alt="CloudWatch alarm event pattern" caption="Figure 29 – CloudWatch alarm event pattern" >}}
 
 ```json
-{"dryRun": true}
+{
+  "source": ["aws.cloudwatch"],
+  "detail-type": ["CloudWatch Alarm State Change"],
+  "detail": {
+    "alarmName": [
+      "netmon-cpu-high-80",
+      "netmon-ram-high-80",
+      "netmon-disk-high-85"
+    ]
+  }
+}
 ```
 
-5. To test alerts, select a lab device (replace the ID). `forcePeak` generates random values between 90 and 97%, so configure a threshold below 90 for a deterministic breach. After testing, run `forceNormal` separately to restore values to 25–45%.
+5. Set the **Target** to `netmon-save-alert`. Verify that the Lambda resource-based policy allows EventBridge invocation.
 
-```json
-{"deviceId":"LAB-CRUD-01","forcePeak":true}
-```
+{{< netmonimg src="images/netmon-workshop/30-eventbridge-netmon-alarm-state-rule-lambda-target.png" alt="EventBridge Lambda target" caption="Figure 30 – EventBridge Lambda target" >}}
+
+6. Test with a valid CloudWatch event or a controlled alarm state change in the demo environment. Then open **DynamoDB → Explore items → NetworkAlerts → Scan → Run**.
 
 ## Verification
 
-Inspect the function's CloudWatch Logs and Explore table items for `cpuUsage`, `memoryUsage`, and `lastSimulatedAt`. Check alerts after configuring the stream triggers in 5.4.4. Demo changes do not prove live EC2 monitoring.
+Records should include fields such as `eventId`, `alarmName`, `alarmState`, `eventTime`, and device identification where available. Distinguish test records from genuine events using `isTest`. Earlier lab results showed one test record (`isTest=true`) and a non-test event (`isTest=false`).
 
-[EventBridge Scheduler documentation](https://docs.aws.amazon.com/scheduler/latest/UserGuide/getting-started.html)
+> Common issue: `AccessDeniedException` for `dynamodb:PutItem`. Fix the execution role policy and retry; do not recreate the table to work around an IAM issue.
 
-## Test scenarios
+## Distinguish the two trigger types
 
-| Test event | Purpose |
-|---|---|
-| `{"dryRun":true}` | Preview due devices without writes |
-| `{"deviceId":"LAB-CRUD-01","forceRun":true}` | Refresh only the lab device |
-| `{"deviceId":"LAB-CRUD-01","forcePeak":true}` | Generate CPU/RAM in the 90–97% range |
-| `{"deviceId":"LAB-CRUD-01","forceNormal":true}` | Return values to 25–45% |
+`netmon-alarm-state-rule` handles CloudWatch state changes; it does not generate random router/switch CPU or memory. If a scheduled `netmon-device-monitor` function is deployed, verify its separate recurring trigger, table permissions, and `sns:Publish` if email is required. Check each invocation in CloudWatch Logs; use `eventId` to avoid duplicate records if EventBridge redelivers a state change. An alarm-rule screenshot does not establish an active simulation schedule.
 
-Check the enabled schedule, target and role. If invoked but updated=0, inspect due, skippedInterval and metricsSource; if not invoked, investigate the schedule and permissions. Avoid duplicate one-minute schedules.
 
-## Screenshots and supporting evidence
-
-{{< photo src="workshop/evidence/04_EventBridge_chu_ky_1_phut.png" alt="EventBridge schedule configured for a one-minute interval." caption="User-provided AWS screenshot. EventBridge schedule configured for a one-minute interval." >}}
-
-{{< photo src="workshop/evidence/08_Lambda_GET_simulation_config.png" alt="Lambda simulation configuration response." caption="User-provided AWS screenshot. Lambda simulation configuration response." >}}
-
-## Scheduler fields
-
-| Field | Value to verify |
-|---|---|
-| Schedule pattern | rate(1 minute) |
-| Flexible time window | Off |
-| Target | AWS Lambda → netmon-simulator |
-| Payload | `{}` |
-| State | Enabled |
-| Execution role | lambda:InvokeFunction → netmon-simulator |
-
-Compare these values with existing resources; do not duplicate or modify working resources solely to match the lab.
+[← Back to chapter](../)

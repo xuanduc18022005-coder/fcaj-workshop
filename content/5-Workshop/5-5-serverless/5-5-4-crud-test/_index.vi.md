@@ -1,53 +1,55 @@
-+++
-title = "5.5.4. Kiểm thử CRUD và truy vấn dữ liệu"
-weight = 4
-translationKey = "ws-4-4"
-+++
+---
+title: "5.5.4. Kiểm thử CRUD và truy vấn dữ liệu"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 4
+---
 
-## Các bước
-Sau khi tạo API, kiểm thử trực tiếp bằng Lambda Test trước khi dùng HTTP API bảo vệ. Dùng `deviceId` thử riêng, ví dụ `LAB-CRUD-01`; không sửa/xóa EC2 đang hoạt động.
+## Mục tiêu
 
-| Kiểm thử | Kết quả mong đợi |
-|---|---|
-| GET `/devices` | Danh sách JSON |
-| POST `/devices` | Tạo thiết bị thử với dữ liệu hợp lệ |
-| GET `/devices/LAB-CRUD-01` | Chi tiết thiết bị |
-| PUT `/devices/LAB-CRUD-01` | Dữ liệu được cập nhật |
-| DELETE `/devices/LAB-CRUD-01` (sau khi kiểm thử mô phỏng) | Xóa đúng bản ghi thử |
+Kiểm tra CRUD trên bảng `NetworkDevices` qua Lambda/API bằng **bản ghi thử riêng** để không thay đổi dữ liệu EC2 thật đang phục vụ đồ án.
 
-Mở DynamoDB → Explore table items để đối chiếu, xem CloudWatch Logs khi có lỗi. Sau khi cấu hình Cognito và JWT ở chương 5.6, lặp lại qua giao diện để kiểm tra quyền đọc/ghi. Không tắt JWT để xử lý lỗi 401/403.
+## Chuẩn bị bản ghi thử
 
-## Kết quả mong đợi
-CRUD phản ánh trên DynamoDB và giao diện, các lỗi dữ liệu được xử lý; chưa xác nhận kết quả trên AWS thật trong tài liệu này.
-
-## Ví dụ event Lambda Test (không đi qua JWT)
-
-Tạo thiết bị lab có ID chưa tồn tại. Dùng JSON sau trong tab Test của Lambda `netmon-api`:
+Sử dụng `deviceId` bắt đầu bằng `TEST-` và IP private dành cho ví dụ, chẳng hạn `TEST-SW01`.
 
 ```json
-{"requestContext": {"http": {"method": "POST"}}, "rawPath": "/devices", "body": "{\"deviceId\":\"LAB-CRUD-01\",\"deviceName\":\"Switch Lab\",\"deviceType\":\"Switch\",\"ipAddress\":\"10.0.0.20\",\"location\":\"Lab\"}"}
+{
+  "deviceId": "TEST-SW01",
+  "deviceName": "Switch test NetMon",
+  "deviceType": "Switch",
+  "ipAddress": "10.0.0.250",
+  "status": "Online"
+}
 ```
 
-Mã dự án tự sinh CPU/RAM ban đầu cho thiết bị mô phỏng nếu không nhập. Kỳ vọng HTTP 201 và `metricsSource=SIMULATED`. Kiểm tra lại:
+## Kịch bản CRUD
 
-```json
-{"requestContext":{"http":{"method":"GET"}},"rawPath":"/devices/LAB-CRUD-01"}
-```
+1. **POST `/devices`**: tạo thiết bị `TEST-SW01`, kỳ vọng phản hồi thành công và bản ghi xuất hiện trong DynamoDB.
+2. **GET `/devices`**: đọc danh sách, kiểm tra có thiết bị thử.
 
-```json
-{"requestContext": {"http": {"method": "PUT"}}, "rawPath": "/devices/LAB-CRUD-01", "body": "{\"deviceName\":\"Switch Lab Updated\"}"}
-```
+{{< netmonimg src="images/netmon-workshop/33-dynamodb-networkdevices-2-items.png" alt="Hai bản ghi trong NetworkDevices" caption="Ảnh 33 – Hai bản ghi trong NetworkDevices" >}}
 
-Giữ bản ghi này cho ca kiểm thử simulator và cảnh báo, chỉ DELETE sau khi hoàn thành và xác nhận đúng ID. Kiểm tra API trả 400 khi payload sai; không coi Lambda Test là minh chứng JWT vì đã bỏ qua API Gateway.
+3. **GET `/devices/TEST-SW01`**: đọc chi tiết, đối chiếu đủ thuộc tính.
 
-## Thao tác trên AWS Console và ảnh đối chiếu
+4. **PUT `/devices/TEST-SW01`**: cập nhật trạng thái hoặc tên; đọc lại để kiểm tra.
 
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
+5. **DELETE `/devices/TEST-SW01`**: chỉ xóa bản ghi thử sau khi đã thu thập minh chứng.
+6. **GET `/alerts`** và **PUT `/alerts/{id}`**: xác nhận bảng lịch sử, chỉ thay đổi cảnh báo thử; không tự động đánh dấu cảnh báo thật đã xử lý.
 
-### Bước 1
+{{< netmonimg src="images/netmon-workshop/37-lambda-netmon-api-get-devices-test-200.png" alt="GET /devices trả về HTTP 200 và dữ liệu thiết bị" caption="Ảnh 37 – GET /devices trả về HTTP 200 và dữ liệu thiết bị" >}}
 
-Lambda → Test: chọn event GET devices và bấm Test, kiểm tra Execution result.
+## Lưu ý bảo mật
 
-{{< photo src="workshop/aws-console/35-lambda-netmon-api-test-succeeded-details-collapsed.png" alt="Lambda → Test: chọn event GET devices và bấm Test, kiểm tra Execution result." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
+Nếu đã gắn JWT Authorizer, hãy gọi API bằng Access Token có scope `netmon-api/read` hoặc `netmon-api/write` thích hợp. Nếu không có token, 401 là kết quả mong đợi.
 
-**Ảnh giao diện liên quan:** [Quản lý thiết bị](../../#netmon-devices).
+**Trạng thái:** Đây là kế hoạch kiểm thử đầu-cuối; từ những ảnh đã có, chưa đủ căn cứ khẳng định tất cả thao tác CRUD trên trình duyệt đều thành công.
+
+## Đối chiếu thao tác trên giao diện
+
+Mở trang **Thiết bị**, thêm một Switch thử nghiệm, để trống CPU/RAM khi bản mô phỏng hỗ trợ tự sinh. Tìm bằng tên hoặc ID, mở chi tiết, sửa vị trí/trạng thái, tải lại trang rồi kiểm tra DynamoDB nếu đang dùng chế độ AWS. Xóa đúng bản ghi thử. Với thiết bị EC2, giữ `instanceId` và nguồn AWS, không sửa CPU/RAM bằng tay.
+
+Chế độ demo đã kiểm thử CRUD và sinh RAM mô phỏng. Khi dùng AWS, kiểm tra riêng từng yêu cầu trong Network tab và bảng thật, không chỉ dựa vào thông báo thành công trên UI.
+
+
+[← Về chương](../)

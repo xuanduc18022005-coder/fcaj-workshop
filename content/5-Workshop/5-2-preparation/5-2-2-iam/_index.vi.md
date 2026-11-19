@@ -1,49 +1,51 @@
-+++
-title = "5.2.2. Cấu hình IAM và phân công nhóm"
-weight = 2
-translationKey = "ws-1-2"
-+++
+---
+title: "5.2.2. Cấu hình IAM và phân công nhóm"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 2
+---
 
 ## Mục tiêu
-Phân quyền riêng cho từng thành viên và từng dịch vụ, không dùng chung thông tin đăng nhập.
+
+Phân công trách nhiệm triển khai và cấu hình IAM để từng thành viên có thể thực hiện phần việc của mình mà không dùng chung thông tin đăng nhập.
+
+## Phân công nhóm
+
+| Thành viên | Vai trò |
+|---|---|
+| Tùng Dương | VPC, Public/Private Subnet, Route Table, Internet Gateway, Security Group, EC2 |
+| Xuân Đức | Lambda, DynamoDB, API Gateway, xử lý CRUD và API cảnh báo |
+| Mạnh Quân | CloudWatch, SNS, giao diện và kiểm thử |
 
 ## Thực hiện
-1. Mở IAM, kiểm tra user/role đã được cấp quyền. Bật MFA, tránh sử dụng root trong công việc thường ngày.
-2. Phân công Nguyễn Tùng Dương phụ trách VPC, EC2 và bảo mật; Trần Xuân Đức phụ trách Lambda, DynamoDB, API Gateway; Lê Mạnh Quân phụ trách giám sát, giao diện và kiểm thử.
-3. Tạo execution role cho mỗi Lambda; chỉ cấp thao tác với bảng và dịch vụ cần thiết. Đối chiếu các policy mẫu trong `AWS_BACKEND_CODE` trước khi áp dụng.
-4. Với EC2, dùng instance profile cho CloudWatch Agent nếu cần. Không nhúng Access Key vào mã JavaScript.
+
+1. Vào **IAM → Users**. Tạo IAM user riêng hoặc sử dụng AWS IAM Identity Center theo khả năng của tài khoản.
+2. Chỉ bật **AWS Management Console access** cho tài khoản cần truy cập Console; thiết lập mật khẩu mạnh và MFA.
+3. Tạo policy hoặc nhóm quyền theo công việc. Trong thời gian thực hành, có thể dùng policy AWS-managed phù hợp, sau đó thu hẹp quyền khi triển khai ổn định.
+
+4. Khi tạo Lambda, mở **Configuration → Permissions** để xác định execution role. Role `netmon-api` cần được cấp quyền phù hợp để đọc/ghi `NetworkDevices`, `NetworkAlerts` và đọc chỉ số CloudWatch theo nhu cầu thực tế.
+
+{{< netmonimg src="images/netmon-workshop/53-lambda-netmon-api-execution-role-permissions.png" alt="Execution role của Lambda netmon-api" caption="Ảnh 53 – Execution role của Lambda netmon-api" >}}
+
+{{< netmonimg src="images/netmon-workshop/54-iam-netmon-api-role-permission-policies.png" alt="Danh sách IAM policies của role" caption="Ảnh 54 – Danh sách IAM policies của role" >}}
+
+{{< netmonimg src="images/netmon-workshop/55-iam-netmon-api-access-policy-json.png" alt="JSON chính sách quyền DynamoDB và CloudWatch" caption="Ảnh 55 – JSON chính sách quyền DynamoDB và CloudWatch" >}}
+
+5. Execution role của `netmon-save-alert` chỉ nên được cấp quyền cần thiết để ghi bảng `NetworkAlerts` và ghi log CloudWatch.
 
 ## Kiểm tra
-Xác nhận từng thành viên thao tác được trong phạm vi được phép; rà các quyền rộng không cần thiết.
 
-[Tài liệu IAM](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
+Đăng nhập bằng user của từng thành viên, kiểm tra các chức năng được cấp. Khi gặp `AccessDeniedException`, xem tên action và tài nguyên trong CloudWatch Logs rồi sửa role chính xác, không cấp quyền `*` bừa bãi.
 
-## Bảng quyền theo vai trò dịch vụ
+> **Phân biệt:** IAM user quản trị AWS khác với Cognito user đăng nhập ứng dụng NetMon. Xóa tài khoản Cognito không xóa tài nguyên IAM hoặc EC2.
 
-| Đối tượng | Quyền cần kiểm tra |
-|---|---|
-| netmon-api | Đọc/ghi đúng bốn bảng, đọc CloudWatch metrics, đọc SNS topic/subscription |
-| netmon-simulator | Đọc cấu hình, Scan và UpdateItem NetworkDevices |
-| netmon-device-monitor | Đọc Streams, đọc thiết bị/ngưỡng, ghi cảnh báo, cập nhật cờ, sns:Publish |
-| netmon-audit-writer | Đọc Streams, ghi NetworkAuditLogs |
-| EventBridge Scheduler | lambda:InvokeFunction đối với simulator |
-| EC2 | Instance profile gửi metrics; Session Manager nếu sử dụng |
+## Phân biệt ba lớp quyền
 
-Khi gặp AccessDenied, tra CloudWatch Logs để xác định action và ARN bị từ chối, bổ sung quyền đúng phạm vi thay vì cấp AdministratorAccess. Tất cả execution role của Lambda cần quyền ghi log tương ứng.
+- IAM user/role của thành viên: quản trị tài nguyên trên AWS Console theo phần việc.
+- Execution role của Lambda và instance role của EC2: cho phép dịch vụ truy cập đúng tài nguyên cần dùng, không dùng access key cứng.
+- Cognito user: đăng nhập ứng dụng NetMon; không mặc nhiên được truy cập AWS Console.
 
-## Thao tác trên AWS Console và ảnh đối chiếu
+Khi gặp lỗi `AccessDenied`, xác định yêu cầu phát sinh từ người quản trị, Lambda hay EC2 trước khi sửa policy. Không cấp quyền AdministratorAccess cho toàn bộ dịch vụ để xử lý lỗi.
 
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
 
-### Bước 1
-
-Lambda → netmon-api → Configuration → Permissions: kiểm tra Execution role; nhấn tên role để mở IAM.
-
-{{< photo src="workshop/aws-console/53-lambda-netmon-api-execution-role-permissions.png" alt="Lambda → netmon-api → Configuration → Permissions: kiểm tra Execution role; nhấn tên role để mở IAM." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 2
-
-IAM → Roles → role của netmon-api → Permissions: đối chiếu các policy đã đính kèm với nhiệm vụ của hàm.
-
-{{< photo src="workshop/aws-console/54-iam-netmon-api-role-permission-policies.png" alt="IAM → Roles → role của netmon-api → Permissions: đối chiếu các policy đã đính kèm với nhiệm vụ của hàm." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)

@@ -1,16 +1,16 @@
-+++
-title = "5.6. Cognito, JWT and frontend"
-weight = 6
-translationKey = "ws-chapter-5"
-+++
+---
+title: "5.6. Cognito, JWT, and the NetMon Interface"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 6
+---
 
-Separate Cognito authentication, JWT authorization and the HTML/CSS/JavaScript interface.
+Protect APIs with Cognito JWT, verify read/write scopes, and test PKCE from an HTML/JS frontend.
 
-## Detailed lab exercises
+## Detailed practice lessons
 
-- [5.6.1. Create a Cognito user pool and web client](5-6-1-cognito/)
-- [5.6.2. Configure JWT authorizer and OAuth scopes](5-6-2-jwt/)
-- [5.6.3. Sign in with PKCE and invoke the API](5-6-3-frontend-login/)
-- [5.6.4. Connect the interface and manage devices](5-6-4-test-ui/)
-- [5.6.5. Monitoring and infrastructure topology](5-6-5-monitoring-ui/)
-- [5.6.6. Alerts, logs and settings](5-6-6-alerts-logs-settings/)
+- [5.6.1. Create a Cognito User Pool and Web Client](5-6-1-cognito/)
+- [5.6.2. Create a JWT Authorizer and OAuth Scopes](5-6-2-jwt/)
+- [5.6.3. Build a VS Code Test Page](5-6-3-test-ui/)
+- [5.6.4. Sign In with PKCE and Call Protected APIs](5-6-4-frontend-login/)
+- [5.6.5. Operate the NetMon Management Interface](5-6-5-netmon-interface/)

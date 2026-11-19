@@ -1,0 +1,13 @@
+{{- $src := strings.TrimPrefix "/" (.Get "src") -}}
+{{- $fallback := printf "images/workshop/aws-console/%s" (path.Base $src) -}}
+{{- if not (fileExists (printf "static/%s" $src)) -}}
+  {{- if fileExists (printf "static/%s" $fallback) -}}
+    {{- $src = $fallback -}}
+  {{- else -}}
+    {{- warnf "Missing workshop image: %s on %s" $src .Page.RelPermalink -}}
+  {{- end -}}
+{{- end -}}
+<figure class="report-photo">
+  <img src="{{ $src | relURL }}" alt="{{ .Get "alt" }}" loading="lazy">
+  {{ with .Get "caption" }}<figcaption>{{ . }}</figcaption>{{ end }}
+</figure>

@@ -1,75 +1,56 @@
-+++
-title = "5.3.1. Tạo VPC, Subnet, Route Table và IGW"
-weight = 1
-translationKey = "ws-2-1"
-+++
+---
+title: "5.3.1. Tạo VPC, Subnet, Route Table và IGW"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 1
+---
 
-## Các bước thực hiện
+## Mục tiêu
 
-1. Vào VPC → Your VPCs → Create VPC (hoặc mở VPC nhóm đã tạo). Ví dụ CIDR `10.0.0.0/16`.
-2. Tạo subnet public `10.0.0.0/20`; private `10.0.128.0/20` nếu cần mở rộng. Chọn AZ phù hợp.
-3. Tạo và attach Internet Gateway vào VPC. Thêm route `0.0.0.0/0` trỏ IGW ở route table public và associate đúng subnet. Không thêm route IGW cho subnet private.
-4. Tạo Security Group cho EC2. Không mở SSH từ mọi IP; ưu tiên Session Manager nếu đã chuẩn bị đủ quyền và kết nối. Chỉ mở inbound cần thiết.
+Thiết lập mạng ảo để triển khai máy chủ giám sát EC2, tách biệt các thành phần kết nối Internet và các thành phần nội bộ.
 
-## Kiểm tra
+## Thực hiện trên AWS Console
 
-VPC và subnet liên kết đúng, route table public trỏ IGW, security group không mở cổng không cần thiết. Không tạo NAT Gateway chỉ phục vụ demo nếu không cần, vì có chi phí.
+1. Vào **VPC → Your VPCs → Create VPC**. Chọn kiểu VPC phù hợp. Dải CIDR của `netmon-vpc` trong ảnh thực tế là `10.0.0.0/16`.
 
-Tài liệu: [Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html).
+{{< netmonimg src="images/netmon-workshop/06-netmon-vpc-resource-map.png" alt="Bản đồ tài nguyên VPC netmon-vpc" caption="Ảnh 06 – Bản đồ tài nguyên VPC netmon-vpc" >}}
 
-## Bảng cấu hình tham khảo
+2. Tạo **Public subnet** `10.0.0.0/20` và **Private subnet** `10.0.128.0/20` trong Availability Zone phù hợp.
 
-| Thành phần | Thông số theo ảnh nhóm |
-|---|---|
-| VPC | netmon-vpc, 10.0.0.0/16 |
-| Public subnet | 10.0.0.0/20 |
-| Private subnet (nếu có) | 10.0.128.0/20 |
-| Public route table | local; 0.0.0.0/0 → IGW |
-| Private route table | local; không có route trực tiếp tới IGW |
+{{< netmonimg src="images/netmon-workshop/07-subnet-list.png" alt="Danh sách hai subnet" caption="Ảnh 07 – Danh sách hai subnet" >}}
 
-Các CIDR trên được đối chiếu với ảnh cấu hình của nhóm, không đổi VPC đã triển khai để khớp báo cáo. Vào Your VPCs → chọn VPC → **Resource map** để kiểm tra subnet và route table. Nếu EC2 cần gửi metric nhưng không có đường ra dịch vụ AWS, kiểm tra đường kết nối hoặc VPC endpoint phù hợp; không mở inbound chỉ để gửi metric.
+{{< netmonimg src="images/netmon-workshop/08-public-subnet-details.png" alt="Thông tin Public subnet" caption="Ảnh 08 – Thông tin Public subnet" >}}
 
-**Ảnh minh chứng:** Resource map, route table association và Internet Gateway đã attach.
+{{< netmonimg src="images/netmon-workshop/09-private-subnet-details.png" alt="Thông tin Private subnet" caption="Ảnh 09 – Thông tin Private subnet" >}}
+
+3. Tạo **Internet Gateway**, sau đó attach vào VPC.
+
+{{< netmonimg src="images/netmon-workshop/14-netmon-igw-details.png" alt="Internet Gateway netmon-igw" caption="Ảnh 14 – Internet Gateway netmon-igw" >}}
+
+4. Tạo **Public Route Table**; đặt route `0.0.0.0/0` trỏ tới Internet Gateway và liên kết với Public subnet.
+
+{{< netmonimg src="images/netmon-workshop/10-route-tables-list.png" alt="Danh sách route table" caption="Ảnh 10 – Danh sách route table" >}}
+
+{{< netmonimg src="images/netmon-workshop/11-netmon-rtb-public-routes.png" alt="Các route của netmon-rtb-public" caption="Ảnh 11 – Các route của netmon-rtb-public" >}}
+
+{{< netmonimg src="images/netmon-workshop/12-netmon-main-route-table-no-name.png" alt="Main route table của VPC" caption="Ảnh 12 – Main route table của VPC" >}}
+
+{{< netmonimg src="images/netmon-workshop/13-netmon-rtb-private1-us-east-1a-routes.png" alt="Route table của Private subnet" caption="Ảnh 13 – Route table của Private subnet" >}}
+
+5. Private subnet không tự có đường ra Internet. Nếu cần truy cập Internet từ Private subnet, phải thiết kế giải pháp NAT phù hợp và đánh giá chi phí trước khi triển khai.
+6. Kiểm tra **Network ACL** và **Security Group** theo luồng traffic dự kiến; mặc định chặn những kết nối không cần thiết.
+
+## Kết quả cần chụp
+
+- VPC và dải CIDR, danh sách subnet.
+- Route table và liên kết đến Internet Gateway.
+- Security Group gắn cho máy chủ EC2.
+
+> Không tạo NAT Gateway chỉ để hoàn thiện hình minh họa nếu dự án không thật sự cần, vì dịch vụ này có thể phát sinh phí theo giờ và lưu lượng.
+
+## Liên hệ với kiến trúc NetMon
+
+EC2 nằm trong Public subnet phục vụ bài thực hành. Private subnet dành cho thành phần nội bộ khi mở rộng, không đồng nghĩa đã có máy chủ ở đó. API Gateway, Cognito, DynamoDB và Lambda không tự động nằm trong subnet này; chỉ cấu hình Lambda kết nối VPC nếu có nhu cầu truy cập tài nguyên private. Sơ đồ hạ tầng nên phản ánh các tài nguyên AWS; sơ đồ mạng của giao diện có thể hiển thị thiết bị mô phỏng và không phải bản đồ kết nối vật lý được phát hiện tự động.
 
 
-## Thao tác trên AWS Console và ảnh đối chiếu
-
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
-
-### Bước 1
-
-VPC → Your VPCs → netmon-vpc → Resource map. Kiểm tra IPv4 CIDR và các liên kết subnet/route table.
-
-{{< photo src="workshop/aws-console/06-netmon-vpc-resource-map.png" alt="VPC → Your VPCs → netmon-vpc → Resource map. Kiểm tra IPv4 CIDR và các liên kết subnet/route table." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 2
-
-VPC → Subnets → chọn public subnet; đối chiếu CIDR 10.0.0.0/20, AZ us-east-1a và route table public.
-
-{{< photo src="workshop/aws-console/08-public-subnet-details.png" alt="VPC → Subnets → chọn public subnet; đối chiếu CIDR 10.0.0.0/20, AZ us-east-1a và route table public." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 3
-
-Chọn private subnet; đối chiếu CIDR 10.0.128.0/20 và Auto-assign public IPv4 address = No.
-
-{{< photo src="workshop/aws-console/09-private-subnet-details.png" alt="Chọn private subnet; đối chiếu CIDR 10.0.128.0/20 và Auto-assign public IPv4 address = No." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 4
-
-Internet gateways → netmon IGW: kiểm tra trạng thái Attached và VPC tương ứng.
-
-{{< photo src="workshop/aws-console/14-netmon-igw-details.png" alt="Internet gateways → netmon IGW: kiểm tra trạng thái Attached và VPC tương ứng." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 5
-
-Route tables → netmon-rtb-public → Routes: kiểm tra local và 0.0.0.0/0 → IGW.
-
-{{< photo src="workshop/aws-console/11-netmon-rtb-public-routes.png" alt="Route tables → netmon-rtb-public → Routes: kiểm tra local và 0.0.0.0/0 → IGW." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 6
-
-Route table private → Routes và Subnet associations: kiểm tra đường local và không có đường IGW trực tiếp.
-
-{{< photo src="workshop/aws-console/13-netmon-rtb-private1-us-east-1a-routes.png" alt="Route table private → Routes và Subnet associations: kiểm tra đường local và không có đường IGW trực tiếp." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-**Ảnh giao diện liên quan:** [Kiến trúc AWS và sơ đồ mạng](../../#netmon-topology).
+[← Về chương](../)

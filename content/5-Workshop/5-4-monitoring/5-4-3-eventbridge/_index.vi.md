@@ -1,61 +1,56 @@
-+++
-title = "5.4.3. EventBridge Scheduler và mô phỏng thiết bị"
-weight = 3
-translationKey = "ws-3-3"
-+++
+---
+title: "5.4.3. Tạo quy tắc EventBridge chuyển trạng thái Alarm"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 3
+---
 
 ## Mục tiêu
-Tự động cập nhật CPU/RAM thiết bị có `metricsSource=SIMULATED`; không ghi đè chỉ số của EC2.
 
-## Các bước thực hiện
+Khi CloudWatch Alarm thay đổi trạng thái, EventBridge chuyển sự kiện đến Lambda để lưu lịch sử trong DynamoDB, hỗ trợ theo dõi thời điểm và trạng thái xử lý cảnh báo.
 
-1. Hoàn thành bảng `NetworkDevices`, `NetworkSettings` ở mục [5.5.1](../../5-5-serverless/5-5-1-dynamodb/). Trong Lambda, tạo hoặc mở `netmon-simulator`, dùng gói `netmon-simulator-deploy.zip` trong `AWS_BACKEND_CODE`. Kiểm tra handler và role có quyền đọc cấu hình, Scan và UpdateItem đúng bảng.
-2. Vào Amazon EventBridge → Scheduler → Schedules → Create schedule. Đặt tên ví dụ `netmon-simulator-schedule`, dùng biểu thức `rate(1 minute)` và đặt Flexible time window = Off. Target chọn AWS Lambda → `netmon-simulator`, payload `{}`. Sử dụng execution role có quyền gọi đúng hàm. Không tạo lịch trùng nếu đã có.
-3. Trong DynamoDB, kiểm tra item `settingKey=simulation`, thuộc tính `intervalMinutes` kiểu Number từ 1–60 (mặc định 5). Lịch luôn gọi mỗi phút; hàm chỉ cập nhật thiết bị đến hạn dựa trên `lastSimulatedAt`. Mã giới hạn tối đa 100 thiết bị mô phỏng mỗi lần duyệt.
-4. Trong Lambda → Test, dùng event chỉ đọc dưới đây để xem thiết bị đến hạn. Không dùng các event test để cấu hình Scheduler.
+## Thực hiện
+
+1. Đảm bảo bảng `NetworkAlerts` đã tồn tại với Partition Key `eventId` kiểu String.
+2. Tạo Lambda Python `netmon-save-alert` và gắn execution role có quyền `dynamodb:PutItem` vào bảng `NetworkAlerts` cùng quyền ghi CloudWatch Logs.
+
+3. Mở **Amazon EventBridge → Event buses → default → Rules → Create rule**. Đặt tên `netmon-alarm-state-rule`, chọn rule trên event bus `default`.
+
+{{< netmonimg src="images/netmon-workshop/28-eventbridge-default-bus-rule-enabled.png" alt="EventBridge default bus và rule" caption="Ảnh 28 – EventBridge default bus và rule" >}}
+
+4. Trong **Custom pattern (JSON editor)** nhập mẫu sau:
+
+{{< netmonimg src="images/netmon-workshop/29-eventbridge-netmon-alarm-state-rule-pattern.png" alt="Mẫu lọc sự kiện CloudWatch Alarm" caption="Ảnh 29 – Mẫu lọc sự kiện CloudWatch Alarm" >}}
 
 ```json
-{"dryRun": true}
+{
+  "source": ["aws.cloudwatch"],
+  "detail-type": ["CloudWatch Alarm State Change"],
+  "detail": {
+    "alarmName": [
+      "netmon-cpu-high-80",
+      "netmon-ram-high-80",
+      "netmon-disk-high-85"
+    ]
+  }
+}
 ```
 
-5. Để thử cảnh báo, dùng thiết bị lab đã tạo (đổi ID đúng bản ghi). `forcePeak` tạo giá trị ngẫu nhiên 90–97%, nên cần đặt ngưỡng thấp hơn 90 để kiểm thử chắc chắn. Khi xong, dùng `forceNormal` riêng để hạ giá trị về 25–45%.
+5. Trong **Target**, chọn Lambda `netmon-save-alert`. Kiểm tra resource-based policy cho phép EventBridge invoke Lambda.
 
-```json
-{"deviceId":"LAB-CRUD-01","forcePeak":true}
-```
+{{< netmonimg src="images/netmon-workshop/30-eventbridge-netmon-alarm-state-rule-lambda-target.png" alt="Lambda đích trong EventBridge Rule" caption="Ảnh 30 – Lambda đích trong EventBridge Rule" >}}
 
-## Kiểm tra
+6. Kiểm thử bằng một sự kiện CloudWatch hợp lệ hoặc chuyển trạng thái alarm có kiểm soát trong môi trường demo, sau đó vào **DynamoDB → Explore items → NetworkAlerts → Scan → Run**.
 
-Mở CloudWatch Logs của Lambda và Explore table items để xem `cpuUsage`, `memoryUsage`, `lastSimulatedAt`. Xem trạng thái cảnh báo sau khi thiết lập trigger ở mục 5.4.4. Không coi việc thay đổi số liệu demo là kết quả giám sát EC2 thực tế.
+## Kiểm tra kết quả
 
-[Tài liệu EventBridge Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/getting-started.html)
+Bản ghi cần có `eventId`, `alarmName`, `alarmState`, `eventTime` và trường nhận diện thiết bị nếu code có lưu. Dữ liệu test và dữ liệu thật nên được phân biệt bằng `isTest`. Nhóm đã từng thấy một bản ghi thử nghiệm (`isTest=true`) và một bản ghi sự kiện (`isTest=false`) trong bảng.
 
-## Đối chiếu các tình huống kiểm thử
+> Lỗi hay gặp: `AccessDeniedException` với `dynamodb:PutItem`. Hãy sửa chính xác policy execution role và test lại, không tạo bảng mới chỉ vì thiếu quyền.
 
-| Test event | Mục đích |
-|---|---|
-| `{"dryRun":true}` | Kiểm tra số thiết bị đến hạn, không ghi dữ liệu |
-| `{"deviceId":"LAB-CRUD-01","forceRun":true}` | Cập nhật riêng thiết bị lab |
-| `{"deviceId":"LAB-CRUD-01","forcePeak":true}` | Sinh CPU/RAM 90–97% |
-| `{"deviceId":"LAB-CRUD-01","forceNormal":true}` | Đưa giá trị về 25–45% |
+## Hai loại kích hoạt cần phân biệt
 
-Ở Scheduler xem trạng thái Enabled, target và execution role. Nếu Lambda có lượt gọi nhưng `updated=0`, kiểm tra `due`, `skippedInterval` và `metricsSource`; nếu không có lượt gọi, kiểm tra lịch/role. Không tạo lịch 1 phút thứ hai khi lịch cũ đã chạy.
+Rule `netmon-alarm-state-rule` xử lý sự kiện đổi trạng thái CloudWatch, không phải bộ tạo CPU/RAM ngẫu nhiên cho router/switch. Nếu triển khai hàm `netmon-device-monitor` theo chu kỳ, cần kiểm tra trigger định kỳ riêng, quyền đọc/ghi bảng và quyền `sns:Publish` nếu gửi mail. Ghi nhận lần chạy trong CloudWatch Logs; nếu EventBridge gửi lại cùng event, dùng `eventId` để tránh bản ghi trùng. Không khẳng định đã kích hoạt lịch mô phỏng chỉ dựa trên ảnh rule alarm.
 
-## Cấu hình Scheduler
 
-| Thuộc tính | Giá trị cần kiểm tra |
-|---|---|
-| Schedule pattern | rate(1 minute) |
-| Flexible time window | Off |
-| Target | AWS Lambda → netmon-simulator |
-| Payload | `{}` |
-| State | Enabled |
-| Execution role | lambda:InvokeFunction → netmon-simulator |
-
-Dùng các giá trị này để đối chiếu với tài nguyên đang có; không tạo thêm tài nguyên trùng hoặc thay đổi hệ thống đang hoạt động chỉ để khớp bài thực hành.
-
-## Hình ảnh minh họa và minh chứng
-
-{{< photo src="workshop/evidence/04_EventBridge_chu_ky_1_phut.png" alt="Cấu hình lịch EventBridge theo chu kỳ một phút." caption="Ảnh AWS do người dùng cung cấp. Cấu hình lịch EventBridge theo chu kỳ một phút." >}}
-
-{{< photo src="workshop/evidence/08_Lambda_GET_simulation_config.png" alt="Kết quả đọc cấu hình mô phỏng từ Lambda." caption="Ảnh AWS do người dùng cung cấp. Kết quả đọc cấu hình mô phỏng từ Lambda." >}}
+[← Về chương](../)

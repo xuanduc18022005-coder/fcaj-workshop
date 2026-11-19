@@ -1,49 +1,51 @@
-+++
-title = "5.2.2. Set up IAM and team responsibilities"
-weight = 2
-translationKey = "ws-1-2"
-+++
+---
+title: "5.2.2. IAM Setup and Team Roles"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 2
+---
 
 ## Objective
-Separate team and service permissions rather than sharing credentials.
+
+Assign project responsibilities and configure IAM so that each teammate can work without sharing credentials.
+
+## Team responsibilities
+
+| Member | Responsibility |
+|---|---|
+| Tung Duong | VPC, public/private subnets, route tables, Internet Gateway, Security Groups, EC2 |
+| Xuan Duc | Lambda, DynamoDB, API Gateway, device CRUD, and alert APIs |
+| Manh Quan | CloudWatch, SNS, interface, and testing |
 
 ## Steps
-1. Review authorized IAM users or roles. Enable MFA and avoid daily use of the root user.
-2. Nguyen Tung Duong handles VPC, EC2 and security; Tran Xuan Duc handles Lambda, DynamoDB and API Gateway; Le Manh Quan handles monitoring, UI and testing.
-3. Create function-specific execution roles with only required service/table actions. Review the sample policies in `AWS_BACKEND_CODE` before applying them.
-4. Use an EC2 instance profile for the CloudWatch agent where needed. Never embed AWS access keys in JavaScript.
 
-## Check
-Confirm that each member can perform authorized operations; review unnecessary broad permissions.
+1. Open **IAM → Users**. Create separate IAM users, or use AWS IAM Identity Center if it is available.
+2. Enable **AWS Management Console access** only when needed; use strong passwords and MFA.
+3. Create IAM groups or policies based on each member's tasks. Narrow broad AWS-managed policies after the initial lab.
 
-[IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
+4. For Lambda, inspect **Configuration → Permissions**. The `netmon-api` execution role needs appropriate access to `NetworkDevices`, `NetworkAlerts`, and CloudWatch metrics.
 
-## Service permissions checklist
+{{< netmonimg src="images/netmon-workshop/53-lambda-netmon-api-execution-role-permissions.png" alt="Lambda netmon-api execution role" caption="Figure 53 – Lambda netmon-api execution role" >}}
 
-| Principal | Permissions to inspect |
-|---|---|
-| netmon-api | Read/write the relevant four tables, read CloudWatch metrics and SNS configuration |
-| netmon-simulator | Read settings, scan and update NetworkDevices |
-| netmon-device-monitor | Read streams/devices/thresholds, write alerts, update flags, sns:Publish |
-| netmon-audit-writer | Read streams, write NetworkAuditLogs |
-| EventBridge Scheduler | lambda:InvokeFunction on the simulator |
-| EC2 | Instance profile for metrics and, if used, Session Manager |
+{{< netmonimg src="images/netmon-workshop/54-iam-netmon-api-role-permission-policies.png" alt="IAM role permission policies" caption="Figure 54 – IAM role permission policies" >}}
 
-For AccessDenied, identify the denied operation and resource in CloudWatch Logs and grant only the necessary permission. Lambda execution roles also require appropriate logging permissions.
+{{< netmonimg src="images/netmon-workshop/55-iam-netmon-api-access-policy-json.png" alt="JSON policy granting DynamoDB and CloudWatch actions" caption="Figure 55 – JSON policy granting DynamoDB and CloudWatch actions" >}}
 
-## AWS Console walkthrough and evidence
+5. The `netmon-save-alert` role should be limited to writing `NetworkAlerts` and CloudWatch Logs.
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+## Verification
 
-### Step 1
+Sign in as each user and validate granted operations. For `AccessDeniedException`, check the action and resource in CloudWatch Logs, then correct the specific permission rather than granting blanket `*` access.
 
-Lambda → netmon-api → Configuration → Permissions: inspect the execution role; open the role in IAM.
+> **Identity note:** AWS IAM users administer AWS resources; Cognito users sign in to NetMon. Deleting a Cognito user does not remove IAM or EC2 resources.
 
-{{< photo src="workshop/aws-console/53-lambda-netmon-api-execution-role-permissions.png" alt="Lambda → netmon-api → Configuration → Permissions: inspect the execution role; open the role in IAM." caption="Configuration evidence from the team." >}}
+## Distinguish three permission layers
 
-### Step 2
+- Team IAM identities: manage AWS resources according to assigned responsibilities.
+- Lambda execution and EC2 instance roles: grant service access only to required resources, without hard-coded keys.
+- Cognito users: sign in to NetMon; this does not grant AWS Console access.
 
-IAM → Roles → netmon-api role → Permissions: compare attached policies with the function responsibilities.
+For `AccessDenied`, identify whether the request comes from an administrator, Lambda, or EC2 before changing a policy. Do not grant AdministratorAccess to every service as a troubleshooting shortcut.
 
-{{< photo src="workshop/aws-console/54-iam-netmon-api-role-permission-policies.png" alt="IAM → Roles → netmon-api role → Permissions: compare attached policies with the function responsibilities." caption="Configuration evidence from the team." >}}
 
+[← Back to chapter](../)

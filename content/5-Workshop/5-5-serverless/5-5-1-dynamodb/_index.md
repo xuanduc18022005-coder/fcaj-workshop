@@ -1,68 +1,63 @@
-+++
-title = "5.5.1. Create DynamoDB tables"
-weight = 1
-translationKey = "ws-4-1"
-+++
+---
+title: "5.5.1. Create NetworkDevices and NetworkAlerts Tables"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 1
+---
 
-## Table design
+## Objective
 
-| Table | Partition key (String) | Sort key |
-|---|---|---|
-| NetworkDevices | deviceId | — |
-| NetworkAlerts | eventId | — |
-| NetworkSettings | settingKey | — |
-| NetworkAuditLogs | logType | eventKey (String) |
+Design NoSQL storage for the device inventory and alert history. Reuse existing tables instead of creating duplicates.
 
-## Steps
+## Create or verify tables
 
-1. Open DynamoDB → Tables → Create table and use the names and keys above. Consider on-demand billing for test workloads; check cost.
-2. In NetworkDevices, use Explore table items or POST to create a test device. Record deviceName, deviceType, ipAddress, location, status, cpuUsage, memoryUsage and metricsSource.
-3. Enable Streams with New and old images on NetworkDevices for the monitor and audit writer.
-4. NetworkSettings uses `settingKey=thresholds` and `settingKey=simulation` for threshold and interval configuration.
+1. Open **DynamoDB → Tables** in `us-east-1`.
+2. Create or verify **`NetworkDevices`** with String partition key `deviceId` and **On-demand** capacity.
 
-Example logical JSON (not the console's typed JSON format):
+{{< netmonimg src="images/netmon-workshop/33-dynamodb-networkdevices-2-items.png" alt="Two items in NetworkDevices" caption="Figure 33 – Two items in NetworkDevices" >}}
+
+3. Create or verify **`NetworkAlerts`** with String partition key `eventId` and On-demand capacity.
+
+{{< netmonimg src="images/netmon-workshop/32-dynamodb-networkalerts-7-items.png" alt="Items in NetworkAlerts" caption="Figure 32 – Items in NetworkAlerts" >}}
+
+4. A sort key is not needed for the current single-key design. Add indexes only after identifying a real query requirement.
+
+### Example device record
 
 ```json
-{"deviceId":"TEST001","deviceName":"Switch Lab","deviceType":"Switch","ipAddress":"10.0.0.10","status":"ONLINE","metricsSource":"SIMULATED","cpuUsage":45,"memoryUsage":60}
+{
+  "deviceId": "TEST-SW01",
+  "deviceName": "Demo Switch",
+  "deviceType": "Switch",
+  "ipAddress": "10.0.0.10",
+  "status": "Online"
+}
 ```
+
+For EC2, optional fields include `instanceId`, `region`, `metricsSource` (or the field used by the deployed code), and `vpcId`. **Do not enter InstanceId in the IP field**: the two fields identify different things.
+
+### Alert history model
+
+`NetworkAlerts` uses a unique `eventId`, with optional fields such as `alarmName`, `alarmType`, `alarmState`, `eventTime`, `deviceId`, `handlingStatus`, `reason`, and `isTest`.
 
 ## Verification
 
-Read the item back and verify its keys. Do not delete existing data. [DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html).
+Use **Explore items → select table → Scan → Run** and confirm the records appear. `Scan` is reasonable for a small demonstration dataset; larger datasets should use a deliberate `Query` and index design.
 
-## Default configuration
+> Avoid deleting the original `NetworkDevices` table while Lambda or the interface still depends on it.
 
-In Explore table items → Create item, use these two logical JSON objects in `NetworkSettings`; numeric values must be Numbers, not strings. The console may require typed DynamoDB JSON.
+## Extended data model
 
-```json
-{"settingKey":"thresholds","cpuThreshold":80,"ramThreshold":80}
-```
+| Field | Meaning |
+|---|---|
+| `deviceId` | Device identifier and key |
+| `deviceName`, `deviceType`, `ipAddress`, `location` | Name, type, address and installation location |
+| `status`, `lastUpdated` | Management state and update time |
+| `cpuUsage`, `memoryUsage` | Simulated values for devices without real measurements |
+| `instanceId` | EC2 link used for CloudWatch queries |
+| `metricsSource` | Distinguish simulated and AWS sources (verify the deployed code's field name) |
 
-```json
-{"settingKey":"simulation","intervalMinutes":5}
-```
+DynamoDB items can have different attributes. Do not manually enter EC2 CPU/memory when the values should come from CloudWatch. Handle `Decimal` and `null` correctly when serializing Lambda responses as JSON.
 
-Confirm all four tables are Active and keys are Strings. Read existing configuration instead of overwriting live thresholds. The audit table requires `eventKey` in addition to `logType`.
 
-**Evidence:** four-table inventory, key schema and a sanitized test item.
-
-## Screenshots and supporting evidence
-
-{{< photo src="workshop/evidence/02_DynamoDB_NetworkSettings.png" alt="NetworkSettings table in DynamoDB Console." caption="User-provided AWS screenshot. NetworkSettings table in DynamoDB Console." >}}
-
-## AWS Console walkthrough and evidence
-
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
-
-### Step 1
-
-DynamoDB → Tables → NetworkDevices → Explore table items. Inspect deviceId and device records at the time of capture.
-
-{{< photo src="workshop/aws-console/33-dynamodb-networkdevices-2-items.png" alt="DynamoDB → Tables → NetworkDevices → Explore table items. Inspect deviceId and device records at the time of capture." caption="Configuration evidence from the team." >}}
-
-### Step 2
-
-Open NetworkAlerts → Explore table items; check saved alert records.
-
-{{< photo src="workshop/aws-console/32-dynamodb-networkalerts-7-items.png" alt="Open NetworkAlerts → Explore table items; check saved alert records." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)

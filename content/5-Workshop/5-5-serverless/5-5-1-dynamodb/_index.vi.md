@@ -1,68 +1,63 @@
-+++
-title = "5.5.1. Khởi tạo bảng DynamoDB"
-weight = 1
-translationKey = "ws-4-1"
-+++
+---
+title: "5.5.1. Khởi tạo bảng NetworkDevices và NetworkAlerts"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 1
+---
 
-## Thiết kế bảng
+## Mục tiêu
 
-| Bảng | Partition key (String) | Sort key |
-|---|---|---|
-| NetworkDevices | deviceId | — |
-| NetworkAlerts | eventId | — |
-| NetworkSettings | settingKey | — |
-| NetworkAuditLogs | logType | eventKey (String) |
+Thiết kế cơ sở dữ liệu NoSQL cho danh sách thiết bị và lịch sử cảnh báo. Dùng các bảng đã có, không tạo trùng khi không cần thiết.
 
-## Các bước thực hiện
+## Tạo bảng
 
-1. Vào DynamoDB → Tables → Create table, nhập tên và khóa theo bảng trên. Chọn on-demand nếu phù hợp tải thử nghiệm; kiểm tra chi phí.
-2. Trong `NetworkDevices`, vào Explore table items để tạo thiết bị thử hoặc dùng API POST. Thuộc tính `deviceName`, `deviceType`, `ipAddress`, `location`, `status`, `cpuUsage`, `memoryUsage`, `metricsSource` mô tả thiết bị.
-3. Bật DynamoDB Streams với New and old images trên NetworkDevices để monitor/audit writer đọc thay đổi.
-4. NetworkSettings dùng `settingKey=thresholds` và `settingKey=simulation` cho ngưỡng và chu kỳ. API/Lambda sẽ đọc cấu hình này.
+1. Mở **DynamoDB → Tables**, Region `us-east-1`.
+2. Tạo hoặc xác minh bảng **`NetworkDevices`**, Partition Key `deviceId` (String), chế độ dung lượng **On-demand**.
 
-Ví dụ bản ghi logic (JSON thường, không phải định dạng typed JSON của Console):
+{{< netmonimg src="images/netmon-workshop/33-dynamodb-networkdevices-2-items.png" alt="Hai bản ghi trong NetworkDevices" caption="Ảnh 33 – Hai bản ghi trong NetworkDevices" >}}
+
+3. Tạo hoặc xác minh bảng **`NetworkAlerts`**, Partition Key `eventId` (String), On-demand.
+
+{{< netmonimg src="images/netmon-workshop/32-dynamodb-networkalerts-7-items.png" alt="Các bản ghi trong NetworkAlerts" caption="Ảnh 32 – Các bản ghi trong NetworkAlerts" >}}
+
+4. Không cần Sort Key nếu thiết kế hiện tại dùng khóa đơn; chỉ bổ sung index khi xác định được mẫu truy vấn cụ thể.
+
+### Dữ liệu thiết bị ví dụ
 
 ```json
-{"deviceId":"TEST001","deviceName":"Switch Lab","deviceType":"Switch","ipAddress":"10.0.0.10","status":"ONLINE","metricsSource":"SIMULATED","cpuUsage":45,"memoryUsage":60}
+{
+  "deviceId": "TEST-SW01",
+  "deviceName": "Switch Demo",
+  "deviceType": "Switch",
+  "ipAddress": "10.0.0.10",
+  "status": "Online"
+}
 ```
+
+Đối với EC2, có thể lưu thêm `instanceId`, `region`, `metricsSource` (hoặc tên trường theo code thực tế), `vpcId`. **Không chép nhầm InstanceId vào ô IP**: `instanceId` là định danh của EC2, còn `ipAddress` là địa chỉ mạng.
+
+### Dữ liệu lịch sử cảnh báo
+
+`NetworkAlerts` dùng `eventId` duy nhất, có thể lưu thêm `alarmName`, `alarmType`, `alarmState`, `eventTime`, `deviceId`, `handlingStatus`, `reason`, `isTest`.
 
 ## Kiểm tra
 
-Đọc lại item và khóa; không xóa bảng đã có dữ liệu. [DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html).
+Vào **Explore items → chọn bảng → Scan → Run** và xác nhận bản ghi xuất hiện. `Scan` phù hợp dữ liệu demo nhỏ; với dữ liệu lớn nên thiết kế `Query` và index phù hợp.
 
-## Tạo cấu hình mặc định
+> Tránh xóa bảng `NetworkDevices` cũ nếu Lambda hoặc giao diện đang tham chiếu tới bảng đó.
 
-Trong Explore table items → Create item, dùng hai bản ghi dưới đây trong `NetworkSettings` (Number, không phải chuỗi); đây là JSON logic, giao diện Console có thể yêu cầu định dạng DynamoDB JSON.
+## Mô hình dữ liệu mở rộng
 
-```json
-{"settingKey":"thresholds","cpuThreshold":80,"ramThreshold":80}
-```
+| Trường | Ý nghĩa |
+|---|---|
+| `deviceId` | Khóa định danh thiết bị |
+| `deviceName`, `deviceType`, `ipAddress`, `location` | Tên, loại, địa chỉ và vị trí lắp đặt |
+| `status`, `lastUpdated` | Trạng thái quản lý và thời điểm cập nhật |
+| `cpuUsage`, `memoryUsage` | Chỉ số mô phỏng nếu thiết bị không có nguồn đo thật |
+| `instanceId` | Khóa liên kết EC2 để đọc CloudWatch |
+| `metricsSource` | Phân biệt nguồn mô phỏng và nguồn AWS (đối chiếu tên trường trong bản code triển khai) |
 
-```json
-{"settingKey":"simulation","intervalMinutes":5}
-```
+Các mục DynamoDB có thể có thuộc tính khác nhau. Không nhập tay CPU/RAM cho EC2 nếu giá trị phải lấy từ CloudWatch. Khi chuyển dữ liệu giữa Lambda và JSON, lưu ý kiểu `Decimal` và giá trị `null`.
 
-Kiểm tra bốn bảng Active, đúng kiểu String cho khóa. Nếu bảng tồn tại, đọc cấu hình hiện tại thay vì ghi đè ngưỡng nhóm đang dùng. `NetworkAuditLogs` có sort key `eventKey` bắt buộc; không tạo riêng table theo key deviceId.
 
-**Minh chứng:** danh sách bốn bảng, key schema và một item thử đã ẩn dữ liệu nội bộ.
-
-## Hình ảnh minh họa và minh chứng
-
-{{< photo src="workshop/evidence/02_DynamoDB_NetworkSettings.png" alt="Bảng NetworkSettings trong DynamoDB Console." caption="Ảnh AWS do người dùng cung cấp. Bảng NetworkSettings trong DynamoDB Console." >}}
-
-## Thao tác trên AWS Console và ảnh đối chiếu
-
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
-
-### Bước 1
-
-DynamoDB → Tables → NetworkDevices → Explore table items. Kiểm tra deviceId và dữ liệu thiết bị thời điểm chụp.
-
-{{< photo src="workshop/aws-console/33-dynamodb-networkdevices-2-items.png" alt="DynamoDB → Tables → NetworkDevices → Explore table items. Kiểm tra deviceId và dữ liệu thiết bị thời điểm chụp." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 2
-
-Mở NetworkAlerts → Explore table items; kiểm tra các bản ghi cảnh báo đã lưu.
-
-{{< photo src="workshop/aws-console/32-dynamodb-networkalerts-7-items.png" alt="Mở NetworkAlerts → Explore table items; kiểm tra các bản ghi cảnh báo đã lưu." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)

@@ -1,53 +1,41 @@
-+++
-title = "5.3.3. Security Group và IAM Role"
-weight = 3
-translationKey = "ws-2-3"
-+++
+---
+title: "5.3.3. Security Group, IAM Role và truy cập an toàn"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 3
+---
 
-## Các bước
-1. Trong EC2 → Security Groups, mở security group gắn với instance giám sát. Kiểm tra inbound và outbound theo nhu cầu; không mở SSH từ `0.0.0.0/0`.
-2. Nếu dùng Session Manager, kiểm tra SSM Agent, instance profile và kết nối tới các endpoint dịch vụ. Nếu dùng SSH, chỉ cho phép nguồn quản trị cần thiết.
-3. Vào EC2 → Instances → Actions → Security → Modify IAM role; gắn role giám sát đã được phê duyệt nếu chưa có.
+## Mục tiêu
+
+Bảo vệ máy chủ `netmon-ec2-server` và cấp quyền giám sát mà không mở toàn bộ cổng quản trị ra Internet.
+
+## Các bước thao tác
+
+1. Vào **EC2 → Instances**, chọn `netmon-ec2-server` và mở tab **Security**.
+2. Nhấn vào **Security Group** gắn với máy; kiểm tra các **Inbound rules**. Không để SSH TCP/22 có Source `0.0.0.0/0` nếu không có lý do bảo mật cụ thể.
+
+{{< netmonimg src="images/netmon-workshop/15-security-groups-list.png" alt="Danh sách Security Group" caption="Ảnh 15 – Danh sách Security Group" >}}
+
+{{< netmonimg src="images/netmon-workshop/16-netmon-ec2-sg-inbound-no-rules.png" alt="Inbound rules của netmon-ec2-sg đang trống" caption="Ảnh 16 – Inbound rules của netmon-ec2-sg đang trống" >}}
+
+{{< netmonimg src="images/netmon-workshop/17-netmon-ec2-sg-outbound-all-traffic.png" alt="Outbound rules của netmon-ec2-sg" caption="Ảnh 17 – Outbound rules của netmon-ec2-sg" >}}
+
+{{< netmonimg src="images/netmon-workshop/20-ec2-security-netmon-ec2-sg.png" alt="Tab Security trên EC2" caption="Ảnh 20 – Tab Security trên EC2" >}}
+
+3. Nếu truy cập bằng **AWS Systems Manager Session Manager**, kiểm tra SSM Agent, IAM instance profile và kết nối mạng cần thiết; nếu điều kiện chưa đủ, dùng phương án kết nối khác được kiểm soát.
+4. Tại **EC2 → Actions → Security → Modify IAM role**, gắn instance profile có quyền xuất metrics cho CloudWatch Agent (ví dụ policy quản lý phù hợp).
+
+5. Mở tab **Status checks** xác nhận máy đã khởi tạo thành công, rồi đối chiếu log và metrics trên CloudWatch.
 
 ## Kiểm tra
-EC2 hoạt động, agent gửi metric theo cấu hình. Việc bảo vệ instance không thay thế xác thực JWT cho HTTP API.
 
-[EC2 security groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html)
+- Cấu hình inbound phù hợp với demo, không mở SSH công khai.
+- Instance có role phù hợp, không lưu AWS Access Key trực tiếp trên máy.
+- Truy cập quản trị được thử nghiệm bằng cách an toàn và có thể thu hồi.
 
-## Kiểm tra kết nối
+## Kiểm tra kết nối và bảo mật
 
-| Vấn đề | Vị trí kiểm tra |
-|---|---|
-| Không vào được máy | EC2 Connect, IAM instance profile, SSM Agent, route và kết nối outbound |
-| CPU có nhưng RAM trống | CloudWatch Agent, role gửi metric, namespace/dimension |
-| Cổng SSH mở rộng | Security Group → Inbound rules; giới hạn nguồn quản trị hoặc xóa rule không dùng |
+Security Group của EC2 có thể không có inbound rules trong bài thực hành; agent gửi metric qua kết nối outbound và không cần mở SSH cho Internet. Nếu dùng Session Manager, kiểm tra SSM Agent, quyền và đường ra HTTPS. Kiểm tra `CloudWatchAgentServerPolicy` trên role của EC2 nếu agent không gửi số liệu; quyền này không thay thế role của Lambda đọc metric. Không công bố IP quản trị hoặc thông tin đăng nhập trong báo cáo.
 
-Không gắn quyền quản trị tài khoản cho EC2 chỉ để thu thập metric. Ảnh inbound/outbound cần che IP quản trị riêng khi công bố.
 
-## Quy tắc mạng
-
-| Thuộc tính | Giá trị cần kiểm tra |
-|---|---|
-| Inbound | No rules (theo ảnh nhóm / team screenshot) |
-| Outbound | All traffic (ảnh nhóm / team screenshot) |
-| SSH TCP 22 | Không mở công khai / Do not expose publicly |
-| EC2 IAM role | CloudWatchAgentServerPolicy; SSM policy nếu dùng / if used |
-
-Dùng các giá trị này để đối chiếu với tài nguyên đang có; không tạo thêm tài nguyên trùng hoặc thay đổi hệ thống đang hoạt động chỉ để khớp bài thực hành.
-
-## Thao tác trên AWS Console và ảnh đối chiếu
-
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
-
-### Bước 1
-
-EC2 → Security Groups → netmon-ec2-sg → Inbound rules. Ảnh cho thấy không có inbound rules; không mở SSH công khai.
-
-{{< photo src="workshop/aws-console/16-netmon-ec2-sg-inbound-no-rules.png" alt="EC2 → Security Groups → netmon-ec2-sg → Inbound rules. Ảnh cho thấy không có inbound rules; không mở SSH công khai." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 2
-
-Mở Outbound rules: cấu hình nhóm đã dùng All traffic; với môi trường production, thu hẹp theo yêu cầu kết nối.
-
-{{< photo src="workshop/aws-console/17-netmon-ec2-sg-outbound-all-traffic.png" alt="Mở Outbound rules: cấu hình nhóm đã dùng All traffic; với môi trường production, thu hẹp theo yêu cầu kết nối." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)

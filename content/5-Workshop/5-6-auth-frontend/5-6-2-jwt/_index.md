@@ -1,83 +1,50 @@
-+++
-title = "5.6.2. Configure JWT authorizer and OAuth scopes"
-weight = 2
-translationKey = "ws-5-2"
-+++
+---
+title: "5.6.2. Create a JWT Authorizer and OAuth Scopes"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 2
+---
 
 ## Objective
 
-Protect the NetMon HTTP API with an Amazon API Gateway JWT authorizer. Only requests carrying a valid access token and the required scope should reach Lambda.
+Require a valid access token and an appropriate scope before API Gateway allows NetMon read or write operations.
 
-## Configure the JWT authorizer
+## Resource server and OAuth scopes
 
-1. Open API Gateway → NetMon HTTP API → Authorization → Manage authorizers. Create or inspect a JWT authorizer, for example `netmon-jwt-authorizer`.
-2. Set the following values using the actual user pool and app client details:
+1. Open **Cognito → User pool → Applications → Resource servers → Create resource server**.
+2. Set Name `NetMon API`, Identifier `netmon-api`, and add custom scopes `read` and `write`.
+3. Under **App clients → netmon-web-client → Login pages → Edit**, allow `netmon-api/read`, `netmon-api/write`, and the necessary OpenID scopes (such as `openid` and `email`). Save changes.
 
-| Parameter | Value |
+## JWT Authorizer
+
+1. Open **API Gateway → netmon-management-api → Authorization → Manage authorizers → Create**.
+
+2. Select **JWT**, name it `netmon-jwt-authorizer`, and set Identity source `$request.header.Authorization`.
+
+3. Set Issuer to `https://cognito-idp.us-east-1.amazonaws.com/USER_POOL_ID` (replace `USER_POOL_ID`) and Audience to the **App Client ID** of `netmon-web-client`.
+4. Attach it to all eight routes and set **Authorization scopes**:
+
+| Routes | Scope |
 |---|---|
-| Identity source | `$request.header.Authorization` |
-| Issuer | `https://cognito-idp.us-east-1.amazonaws.com/<USER_POOL_ID>` |
-| Audience | Cognito app client ID |
-| Authorization type | JWT |
+| `GET` routes (`/devices`, `/devices/{id}`, `/alerts`, `/metrics`) | `netmon-api/read` |
+| `POST /devices`, `PUT /devices/{id}`, `DELETE /devices/{id}`, `PUT /alerts/{id}` | `netmon-api/write` |
 
-The issuer identifies the user pool; it is not the login domain. For a typical Cognito access token, API Gateway checks `client_id` when `aud` is absent. If `aud` is present, it must match the configured audience.
+## Important notes
 
-3. In Authorization or Routes, attach the authorizer to protected routes and require appropriate scopes. The following is a proposed mapping based on the source routes; verify it in the console:
+The frontend must request these scopes during login and use the **Access Token**, not the ID Token, when calling the API. Allowing both scopes on the app client does not automatically assign distinct user roles; fine-grained user authorization requires a separate design.
 
-| Route | Suggested scope |
-|---|---|
-| GET `/devices`, `/devices/{id}`, `/metrics`, `/alerts`, `/logs`, `/settings`, `/simulation/config`, `/sns/status` | `netmon-api/read` |
-| POST `/devices`; PUT, DELETE `/devices/{id}` | `netmon-api/write` |
-| PUT `/alerts/{id}`, `/settings`, `/simulation/config` | `netmon-api/write` |
+## Verify authorization from the frontend
 
-4. Verify CORS for origin `http://localhost:5500`, headers `Authorization`, `Content-Type` and appropriate methods. Do not require JWT for CORS preflight OPTIONS. Deploy the stage if auto-deploy is disabled.
+Test without a token, with a valid read-scope token, and with a write-scope token for write requests. Hiding Add/Delete buttons is not backend authorization. If every application account receives both scopes, this does not constitute role-based separation of administrators and viewers. Verify each route's configuration and never expose access tokens in logs or demonstrations.
 
-## Authorization flow
+---
 
-Cognito issues access token → frontend sends token → JWT authorizer validates signature, issuer, audience, expiry and scope → Lambda handles request → DynamoDB returns data.
+## Related evidence screenshots
 
-In `app.js`, the `awsRequest` function obtains a token from `netmonAuth.token()` and attaches the header for Cognito-protected API requests:
+{{< netmonimg src="images/netmon-workshop/39-api-gateway-jwt-authorizer-read-scope.png" alt="JWT authorizer and netmon-api/read scope" caption="Figure 39 – JWT authorizer and netmon-api/read scope" >}}
 
-```javascript
-const token = netmonAuth.token();
-// Send the request only after obtaining an access token.
-headers.set('Authorization', `Bearer ${token}`);
-```
+{{< netmonimg src="images/netmon-workshop/45-cognito-resource-server-netmon-api-scopes.png" alt="Resource server netmon-api and two scopes" caption="Figure 45 – Resource server netmon-api and two scopes" >}}
 
-Never put a real token in the report or screenshots.
+{{< netmonimg src="images/netmon-workshop/47-cognito-app-client-managed-login-pages-oauth-scopes.png" alt="Cognito managed-login and OAuth configuration" caption="Figure 47 – Cognito managed-login and OAuth configuration" >}}
 
-## Verification
-
-| Test case | Expected result |
-|---|---|
-| Valid access token with read scope, GET `/devices` | API forwards request to Lambda; HTTP 200 if successful |
-| Missing, invalid or expired token | HTTP 401 Unauthorized on protected route |
-| Valid token with insufficient scope | HTTP 403 Forbidden |
-| Token with write scope and valid CRUD request | Lambda processes and persists data if IAM permits |
-
-Inspect DevTools → Network; do not disable authorization to fix 401/403 errors. These are expected test results, not tests performed in the team's AWS console. OAuth scopes control API access and do not replace Lambda's IAM execution role.
-
-## References
-
-- [JWT authorizers for HTTP APIs](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-jwt-authorizer.html)
-- [JWT troubleshooting](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-troubleshooting-jwt.html)
-
-
-{{< photo src="workshop/jwt-flow.svg" alt="OAuth 2.0, PKCE and JWT authentication flow (technical diagram)." caption="OAuth 2.0, PKCE and JWT authentication flow (technical diagram)." >}}
-
-## API Gateway verification
-
-Open HTTP API → Authorization → Manage authorizers → JWT. Verify Identity source `$request.header.Authorization`, the Cognito pool issuer and the app client audience. Attach the authorizer to each protected route: GET uses `netmon-api/read`, POST/PUT/DELETE use `netmon-api/write` by design. Keep CORS OPTIONS free of token requirements. Redeploy the stage if auto-deploy is off.
-
-Capture the route list, authorizer and scopes without access tokens. After authentication, check GET status in browser Network; try an unauthenticated private session. Never disable the authorizer merely to make a demo work.
-
-## AWS Console walkthrough and evidence
-
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
-
-### Step 1
-
-API Gateway → Authorization → select GET /alerts: check the JWT authorizer and netmon-api/read scope. Repeat for protected read/write routes.
-
-{{< photo src="workshop/aws-console/39-api-gateway-jwt-authorizer-read-scope.png" alt="API Gateway → Authorization → select GET /alerts: check the JWT authorizer and netmon-api/read scope. Repeat for protected read/write routes." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)

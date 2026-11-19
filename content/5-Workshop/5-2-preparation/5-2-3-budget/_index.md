@@ -1,34 +1,43 @@
-+++
-title = "5.2.3. Set up AWS Budgets"
-weight = 3
-translationKey = "ws-1-3"
-+++
+---
+title: "5.2.3. AWS Budgets and Cost Controls"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 3
+---
 
-## Objective
-Monitor spending and avoid forgotten resources.
+## Goal
 
-## Steps
-1. Open Billing and Cost Management → Budgets → Create budget.
-2. Select a monthly Cost budget and a team-appropriate amount; a budget is not actual spending.
-3. Configure an actual-cost alert at an agreed threshold (for example 25%) and enter notification recipients.
-4. Review Cost Explorer for EC2, EBS, IPv4, CloudWatch and request-based services.
+Set up AWS cost monitoring for the lab. **A USD 20 budget is an alert threshold—not actual spending or a hard spending cap**.
 
-## Check
-The budget appears in the list. An alert is not a hard spending cap and does not automatically stop all resources.
+## Console steps
 
-[AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html)
+1. Open **Billing and Cost Management → Budgets → Create budget**; choose **Cost budget**.
+2. Choose **Monthly**, enter **USD 20**, and name the budget `netmon-monthly-budget` or another meaningful name.
 
-## Periodic review
+{{< netmonimg src="images/netmon-workshop/02-aws-budget-overview.png" alt="NetMon budget overview" caption="Figure 02 – NetMon budget overview" >}}
 
-Inspect actual and forecast spending where available and compare by service in Cost Explorer. Check charges that may persist independently of EC2 runtime, including EBS, public IPv4 and logs. Free Tier eligibility does not establish that the whole project is free. Capture the budget with email and account numbers masked.
+3. Configure percentage-based email alerts. During the lab, the team adjusted one alert threshold to **25%**; other useful thresholds are 50% and 100%.
 
-## AWS Console walkthrough and evidence
+{{< netmonimg src="images/netmon-workshop/05-budget-alerts-25-50-100.png" alt="Budget alerts at 25%, 50% and 100%" caption="Figure 05 – Budget alerts at 25%, 50% and 100%" >}}
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+4. Enter the alert recipient email and complete any email verification required.
+5. Review actual charges under **Cost Explorer** or **Bills**, particularly EC2, EBS, CloudWatch, DynamoDB, and any networking resources.
 
-### Step 1
+{{< netmonimg src="images/netmon-workshop/03-aws-budget-history.png" alt="Budget history" caption="Figure 03 – Budget history" >}}
 
-Billing → Budgets → select the budget → Alerts. The team screenshot shows a $20 monthly budget with actual-cost thresholds of 25%, 50%, and 100% ($5, $10, $20); verify the current amount before changing it.
+{{< netmonimg src="images/netmon-workshop/04-aws-monthly-cost-history.png" alt="Monthly cost history" caption="Figure 04 – Monthly cost history" >}}
 
-{{< photo src="workshop/aws-console/05-budget-alerts-25-50-100.png" alt="Billing → Budgets → select the budget → Alerts. The team screenshot shows a $20 monthly budget with actual-cost thresholds of 25%, 50%, and 100% ($5, $10, $20); verify the current amount before changing it." caption="Configuration evidence from the team." >}}
+## Verification
 
+- Confirm that the budget is listed and recipients are correct.
+- Check the currency, monthly period, and warning thresholds.
+- Redact email addresses before publishing cost-console screenshots.
+
+> Note: EC2 uptime, EBS storage, public IPv4, NAT Gateway (if used), and CloudWatch usage may incur charges. Do not assume the entire system is free.
+
+## Monitor operating costs
+
+Review EC2/EBS, public IPv4, custom metrics and CloudWatch Logs, API/Lambda requests, DynamoDB and SNS. A very short simulation interval may increase service requests. The 25% threshold is an early warning, not a resource spending cap. A lab account does not guarantee zero charges.
+
+
+[← Back to chapter](../)

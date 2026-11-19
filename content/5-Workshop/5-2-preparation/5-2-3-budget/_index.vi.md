@@ -1,34 +1,43 @@
-+++
-title = "5.2.3. Thiết lập AWS Budgets"
-weight = 3
-translationKey = "ws-1-3"
-+++
+---
+title: "5.2.3. Thiết lập AWS Budgets và kiểm soát chi phí"
+date: 2026-11-11T00:00:00+07:00
+draft: false
+weight: 3
+---
 
 ## Mục tiêu
-Theo dõi chi phí và tránh tài nguyên bỏ quên.
 
-## Các bước
-1. Mở Billing and Cost Management → Budgets → Create budget.
-2. Chọn Cost budget và kỳ theo tháng. Đặt mức ngân sách phù hợp nhóm; không coi mức ngân sách là chi phí đã phát sinh.
-3. Tạo cảnh báo chi phí thực tế theo ngưỡng nhóm thống nhất (25%, 50%, 100% theo ảnh nhóm); nhập địa chỉ nhận thông báo.
-4. Xem Cost Explorer, kiểm tra EC2, EBS, IPv4, CloudWatch và các dịch vụ có phát sinh request.
+Thiết lập mức theo dõi chi phí khi học tập trên AWS. **Budget 20 USD là ngưỡng theo dõi, không phải số tiền đã chi và cũng không tự khóa tài nguyên**.
 
-## Kiểm tra
-Budget xuất hiện trong danh sách. Cảnh báo không phải giới hạn chi tiêu cứng và không tự động tắt toàn bộ tài nguyên.
+## Các bước thao tác
 
-[AWS Budgets](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html)
+1. Tại AWS Console, mở **Billing and Cost Management → Budgets → Create budget**; chọn **Cost budget**.
+2. Chọn chu kỳ **Monthly** và nhập mức dự kiến **20 USD**. Điền tên rõ nghĩa, chẳng hạn `netmon-monthly-budget`.
 
-## Theo dõi định kỳ
+{{< netmonimg src="images/netmon-workshop/02-aws-budget-overview.png" alt="Tổng quan ngân sách NetMon" caption="Ảnh 02 – Tổng quan ngân sách NetMon" >}}
 
-Trong Budget, xem Actual spend và Forecast nếu có; đối chiếu với Cost Explorer theo Service. Kiểm tra cả các khoản không gắn với thời gian chạy EC2 như EBS, IPv4 và log. Không dựa vào mức Free Tier để khẳng định toàn bộ dự án miễn phí. Giữ ảnh màn hình Budget đã che email và số tài khoản.
+3. Cấu hình thông báo theo phần trăm budget. Trong quá trình thực hành, nhóm đã sửa một mốc xuống **25%**; có thể đặt thêm 50% và 100% theo chính sách nhóm.
 
-## Thao tác trên AWS Console và ảnh đối chiếu
+{{< netmonimg src="images/netmon-workshop/05-budget-alerts-25-50-100.png" alt="Ba ngưỡng cảnh báo 25%, 50%, 100%" caption="Ảnh 05 – Ba ngưỡng cảnh báo 25%, 50%, 100%" >}}
 
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
+4. Điền email người nhận cảnh báo; xác nhận email nếu AWS yêu cầu.
+5. Vào **Cost Explorer** hoặc **Bills** để xem chi phí thật của EC2, EBS, CloudWatch, DynamoDB và các dịch vụ đã bật.
 
-### Bước 1
+{{< netmonimg src="images/netmon-workshop/03-aws-budget-history.png" alt="Lịch sử ngân sách" caption="Ảnh 03 – Lịch sử ngân sách" >}}
 
-Billing → Budgets → chọn ngân sách → Alerts. Ảnh của nhóm ghi mức $20/tháng, cảnh báo Actual cost ở 25%, 50%, 100% (tương ứng $5, $10, $20); đối chiếu mức hiện tại trước khi thay đổi.
+{{< netmonimg src="images/netmon-workshop/04-aws-monthly-cost-history.png" alt="Lịch sử chi phí hàng tháng" caption="Ảnh 04 – Lịch sử chi phí hàng tháng" >}}
 
-{{< photo src="workshop/aws-console/05-budget-alerts-25-50-100.png" alt="Billing → Budgets → chọn ngân sách → Alerts. Ảnh của nhóm ghi mức $20/tháng, cảnh báo Actual cost ở 25%, 50%, 100% (tương ứng $5, $10, $20); đối chiếu mức hiện tại trước khi thay đổi." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
+## Kiểm tra kết quả
 
+- Budget nằm trong danh sách và email người nhận chính xác.
+- Xác nhận đơn vị tiền tệ, chu kỳ tháng và mức cảnh báo.
+- Chụp trang Budget, nhưng che địa chỉ email nếu công khai lên GitHub Pages.
+
+> Chú ý: EC2 chạy liên tục, EBS, public IPv4, NAT Gateway (nếu có) và CloudWatch vượt hạn mức là các nguồn chi phí cần xem kỹ. Không khẳng định toàn bộ hệ thống là miễn phí.
+
+## Theo dõi chi phí khi vận hành
+
+Kiểm tra EC2/EBS, public IPv4, custom metrics và CloudWatch Logs, số lượt gọi API/Lambda, DynamoDB và SNS. Chu kỳ mô phỏng quá ngắn có thể làm tăng lượt gọi dịch vụ. Mốc 25% là cảnh báo sớm, không phải giới hạn chặn tài nguyên. Không khẳng định hệ thống miễn phí chỉ vì đang dùng tài khoản thực hành.
+
+
+[← Về chương](../)
