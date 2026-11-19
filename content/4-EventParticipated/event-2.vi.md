@@ -1,5 +1,5 @@
 +++
-title = "4.2. Event 2 – FCAJ Meetup 17/10"
+title = "4.2. Sự kiện 2 – FCAJ Meetup 17/10"
 weight = 2
 translationKey = "event-2"
 +++
