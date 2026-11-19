@@ -1,76 +1,54 @@
 +++
-title = "5.5.3. Build an HTTP API Gateway"
+title = "5.5.3. Build an HTTP API with Eight Routes"
 weight = 3
-translationKey = "ws-4-3"
+translationKey = "ws-shared-5-5-3-api-gateway"
 +++
 
-## Create and configure the API
+## Objective
 
-1. Open API Gateway → HTTP API, integrate the `netmon-api` Lambda. Check stage and Invoke URL; do not publish internal configuration.
-2. Create routes matching the source and attach the correct integration.
+Create an HTTP API for NetMon management actions and integrate all routes with `netmon-api` Lambda.
 
-| Method | Route | Purpose |
-|---|---|---|
-| GET, POST | `/devices` | List, create |
-| GET, PUT, DELETE | `/devices/{id}` | Detail, edit, delete |
-| GET | `/metrics`, `/alerts`, `/logs` | Metrics, alerts, logs |
-| PUT | `/alerts/{id}` | Update handling status |
-| GET, PUT | `/settings`, `/simulation/config` | Thresholds, simulator interval |
-| GET | `/sns/status` | Check SNS configuration |
+## AWS Console steps
 
-3. Configure CORS for `http://localhost:5500`, GET/POST/PUT/DELETE/OPTIONS and Authorization/Content-Type headers. Preflight must be handled without a token.
-4. Deploy the stage if auto-deploy is off. Enter the matching private project Invoke URL; never add access keys to JavaScript.
+1. Open **API Gateway → APIs → Create API → HTTP API**. The group's API is called `netmon-management-api`.
+2. Create or verify these routes:
 
-## Verification
+{{< netmonimg src="images/netmon-workshop/38-api-gateway-netmon-management-api-routes.png" alt="Eight API Gateway routes" caption="Figure 38 – Eight API Gateway routes" >}}
 
-Check routes, Lambda integrations and stage. Continue to 5.6.1 for Cognito and 5.6.2 to protect routes before invoking the API. [CORS](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html).
-
-## Route verification
-
-The source currently supports 14 method/path pairs in the table above. Compare each route against its integration and the JWT configuration in 5.6.2; this does not establish that every route is deployed. `GET /metrics` also handles EC2 history through query parameters, with no separate route.
-
-## Verify individual routes
-
-In API Gateway → APIs → HTTP API → Routes, select each method/path and inspect its `netmon-api` integration. Check payload format 2.0, which supplies rawPath and requestContext.http. Verify the `$default` or existing stage and base URL rather than appending `/devices` twice. Configure CORS origin without a trailing slash and allow Authorization and Content-Type. If a catch-all route has an authorizer, handle OPTIONS without requiring a token.
-
-| Error | Check |
+| Route | Purpose |
 |---|---|
-| 404 | Route, stage, URL and rawPath |
-| 401/403 | JWT, scope or access policy |
-| 500/502 | Integration, handler, Lambda logs and table permissions |
-| CORS | Origin, methods, headers and preflight |
+| `GET /devices` | List devices |
+| `POST /devices` | Create device |
+| `GET /devices/{id}` | Get device details |
+| `PUT /devices/{id}` | Update device |
+| `DELETE /devices/{id}` | Delete device |
+| `GET /alerts` | List alerts |
+| `PUT /alerts/{id}` | Update alert handling status |
+| `GET /metrics` | Retrieve CPU/memory and EC2 traffic when available |
 
-Complete chapter 5.6 before invoking protected routes with a real token.
+3. Under **Develop → Integrations**, select the `netmon-api` **Lambda function** in `us-east-1`, payload format **2.0**, and attach it to all eight routes.
 
-## Screenshots and supporting evidence
+{{< netmonimg src="images/netmon-workshop/40-api-gateway-integrations-netmon-api.png" alt="API Gateway integrated with netmon-api" caption="Figure 40 – API Gateway integrated with netmon-api" >}}
 
-{{< photo src="workshop/evidence/03_API_Gateway_simulation_routes.png" alt="Simulation configuration route in API Gateway Console." caption="User-provided AWS screenshot. Simulation configuration route in API Gateway Console." >}}
+4. Under **Develop → CORS**, set allowed origin `http://localhost:5500`, methods GET/POST/PUT/DELETE/OPTIONS, and headers `authorization` and `content-type`. Credentials are not required when sending JWTs in the Authorization header.
 
-## AWS Console walkthrough and evidence
+{{< netmonimg src="images/netmon-workshop/41-api-gateway-cors-localhost-5500.png" alt="CORS configuration for localhost:5500" caption="Figure 41 – CORS configuration for localhost:5500" >}}
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+5. Under **Deploy → Stages → `$default`**, confirm **Automatic deployment = Enabled**. If disabled, deploy manually.
 
-### Step 1
+{{< netmonimg src="images/netmon-workshop/42-api-gateway-default-stage-auto-deploy.png" alt="Automatically deployed $default stage" caption="Figure 42 – Automatically deployed $default stage" >}}
 
-API Gateway → netmon-management-api → Routes: create or verify method/path pairs. This earlier screenshot predates some metrics/settings/simulation routes; use the current code as the route reference.
+## Initial test
 
-{{< photo src="workshop/aws-console/38-api-gateway-netmon-management-api-routes.png" alt="API Gateway → netmon-management-api → Routes: create or verify method/path pairs. This earlier screenshot predates some metrics/settings/simulation routes; use the current code as the route reference." caption="Configuration evidence from the team." >}}
+Once routes have JWT authorization, requesting `GET /devices` **without** an Authorization header should return `401 Unauthorized`. This verifies the authorization layer, not the full Lambda integration. Test with a valid access token to confirm the backend.
 
-### Step 2
+> Do not publish real access tokens, secrets, or screenshots containing personal data.
 
-Integrations: select the route → Attach integration → Lambda netmon-api.
+## Connect the newer frontend
 
-{{< photo src="workshop/aws-console/40-api-gateway-integrations-netmon-api.png" alt="Integrations: select the route → Attach integration → Lambda netmon-api." caption="Configuration evidence from the team." >}}
+The eight routes above are the baseline API configuration shown in the screenshots. The monitoring UI may use `GET /metrics` to retrieve CPU, memory, and traffic. If a frontend version also uses `GET /observability` or `GET /sns/status`, verify that the route exists, integrates with the intended Lambda, and uses the read scope before enabling it. These are extensions, not verified deployments based on the eight-route configuration alone.
 
-### Step 3
+In DevTools → Network, check the full URL, method, status code, and JSON response. A 404 may indicate a missing route or incorrect stage; 401/403 point to authentication or scope, and 500 requires CloudWatch Logs inspection.
 
-CORS: allowed origins, methods and headers must match the frontend origin.
 
-{{< photo src="workshop/aws-console/41-api-gateway-cors-localhost-5500.png" alt="CORS: allowed origins, methods and headers must match the frontend origin." caption="Configuration evidence from the team." >}}
-
-### Step 4
-
-Stages → $default: check Auto-deploy; if disabled, deploy after changes.
-
-{{< photo src="workshop/aws-console/42-api-gateway-default-stage-auto-deploy.png" alt="Stages → $default: check Auto-deploy; if disabled, deploy after changes." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)

@@ -1,76 +1,54 @@
 +++
-title = "5.5.3. Xây dựng HTTP API Gateway"
+title = "5.5.3. Xây dựng HTTP API Gateway với 8 Routes"
 weight = 3
-translationKey = "ws-4-3"
+translationKey = "ws-shared-5-5-3-api-gateway"
 +++
 
-## Tạo và cấu hình API
+## Mục tiêu
 
-1. Vào API Gateway → HTTP API, tích hợp Lambda `netmon-api`. Kiểm tra stage và Invoke URL, không ghi URL nội bộ lên báo cáo.
-2. Tạo các route theo mã nguồn và gắn đúng Lambda integration.
+Tạo HTTP API phục vụ thao tác quản lý NetMon và tích hợp vào Lambda `netmon-api`.
 
-| Method | Route | Mục đích |
-|---|---|---|
-| GET, POST | `/devices` | Danh sách, thêm mới |
-| GET, PUT, DELETE | `/devices/{id}` | Chi tiết, sửa, xóa |
-| GET | `/metrics`, `/alerts`, `/logs` | Đọc giám sát, cảnh báo, nhật ký |
-| PUT | `/alerts/{id}` | Đổi trạng thái xử lý |
-| GET, PUT | `/settings`, `/simulation/config` | Ngưỡng, chu kỳ mô phỏng |
-| GET | `/sns/status` | Kiểm tra cấu hình SNS |
+## Các bước trên Console
 
-3. Cấu hình CORS origin `http://localhost:5500`, methods GET/POST/PUT/DELETE/OPTIONS, headers Authorization và Content-Type. Preflight phải được xử lý mà không yêu cầu token.
-4. Deploy stage nếu không bật auto-deploy. Nhập Invoke URL tương ứng vào dự án riêng; không thêm Access Key vào JavaScript.
+1. Vào **API Gateway → APIs → Create API → HTTP API**. Tên dùng trong nhóm: `netmon-management-api`.
+2. Tạo hoặc kiểm tra các routes sau:
 
-## Kiểm tra
+{{< netmonimg src="images/netmon-workshop/38-api-gateway-netmon-management-api-routes.png" alt="Tám route trên API Gateway" caption="Ảnh 38 – Tám route trên API Gateway" >}}
 
-Kiểm tra route, Lambda integration và stage. Tiếp tục mục 5.6.1 để cấu hình Cognito và mục 5.6.2 để bảo vệ route trước khi gọi API. [CORS](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html).
-
-## Kiểm tra route
-
-Mã nguồn hiện hỗ trợ 14 cặp method/path trong bảng trên. Đối chiếu từng route với integration và cấu hình JWT ở mục 5.6.2; không tự nhận tất cả route đã được triển khai. `GET /metrics` xử lý lịch sử EC2 qua query string, không cần route riêng.
-
-## Kiểm tra cấu hình từng route
-
-Vào API Gateway → APIs → chọn HTTP API → Routes. Chọn từng method/path rồi kiểm tra Integration target `netmon-api`. Trong Integrations, kiểm tra payload format 2.0; rawPath và requestContext.http là các trường mã Python sử dụng. Kiểm tra stage `$default` (hoặc stage nhóm đã có) và URL gốc, không gắn `/devices` hai lần. Trong CORS, Origin không có dấu `/` ở cuối, cho phép `Authorization` và `Content-Type`. Nếu dùng catch-all route có authorizer, cấu hình OPTIONS phù hợp để preflight không bị bảo vệ.
-
-| Lỗi | Kiểm tra |
+| Route | Công dụng |
 |---|---|
-| 404 | Route, stage, URL và rawPath |
-| 401/403 | JWT, scope hoặc quyền truy cập |
-| 500/502 | Integration, handler, log Lambda, quyền bảng |
-| CORS | Origin, methods, allowed headers, preflight |
+| `GET /devices` | Liệt kê thiết bị |
+| `POST /devices` | Thêm thiết bị |
+| `GET /devices/{id}` | Xem chi tiết |
+| `PUT /devices/{id}` | Sửa thiết bị |
+| `DELETE /devices/{id}` | Xóa thiết bị |
+| `GET /alerts` | Xem cảnh báo |
+| `PUT /alerts/{id}` | Cập nhật xử lý cảnh báo |
+| `GET /metrics` | Xem CPU/RAM và lưu lượng EC2 khi có dữ liệu |
 
-Chỉ sau khi hoàn tất 5.6 mới gọi các route bảo vệ bằng token thật.
+3. Ở **Develop → Integrations**, chọn **Lambda function** `netmon-api` tại `us-east-1`, payload format **2.0**, và gắn integration vào cả 8 routes.
 
-## Hình ảnh minh họa và minh chứng
+{{< netmonimg src="images/netmon-workshop/40-api-gateway-integrations-netmon-api.png" alt="API Gateway gắn với Lambda netmon-api" caption="Ảnh 40 – API Gateway gắn với Lambda netmon-api" >}}
 
-{{< photo src="workshop/evidence/03_API_Gateway_simulation_routes.png" alt="Route cấu hình mô phỏng trong API Gateway Console." caption="Ảnh AWS do người dùng cung cấp. Route cấu hình mô phỏng trong API Gateway Console." >}}
+4. Ở **Develop → CORS**, cấu hình origin `http://localhost:5500`, methods GET/POST/PUT/DELETE/OPTIONS, headers `authorization`, `content-type`; không bật credentials nếu chỉ gửi JWT trong header.
 
-## Thao tác trên AWS Console và ảnh đối chiếu
+{{< netmonimg src="images/netmon-workshop/41-api-gateway-cors-localhost-5500.png" alt="Cấu hình CORS localhost:5500" caption="Ảnh 41 – Cấu hình CORS localhost:5500" >}}
 
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
+5. Mở **Deploy → Stages → `$default`**, kiểm tra **Automatic deployment = Enabled**. Nếu tắt, cần deploy thủ công.
 
-### Bước 1
+{{< netmonimg src="images/netmon-workshop/42-api-gateway-default-stage-auto-deploy.png" alt="Stage $default tự động triển khai" caption="Ảnh 42 – Stage $default tự động triển khai" >}}
 
-API Gateway → netmon-management-api → Routes: tạo hoặc đối chiếu danh sách method/path. Ảnh thuộc phiên bản trước; bổ sung route metrics/settings/simulation theo mã hiện tại.
+## Kiểm thử ban đầu
 
-{{< photo src="workshop/aws-console/38-api-gateway-netmon-management-api-routes.png" alt="API Gateway → netmon-management-api → Routes: tạo hoặc đối chiếu danh sách method/path. Ảnh thuộc phiên bản trước; bổ sung route metrics/settings/simulation theo mã hiện tại." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
+Khi routes đã gắn JWT Authorizer, gọi `GET /devices` mà **không** gửi Authorization header phải nhận `401 Unauthorized`. Điều này cho thấy lớp bảo vệ đang hoạt động; để xác nhận Lambda thật, cần thử với Access Token hợp lệ.
 
-### Bước 2
+> Trong trang workshop công khai, không đặt Access Token thực, secret hay ảnh chụp dữ liệu cá nhân.
 
-Integrations: chọn route → Attach integration → Lambda netmon-api.
+## Kết nối với phiên bản giao diện mới
 
-{{< photo src="workshop/aws-console/40-api-gateway-integrations-netmon-api.png" alt="Integrations: chọn route → Attach integration → Lambda netmon-api." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
+Tám route trên là cấu hình API nền tảng trong ảnh. Giao diện giám sát có thể dùng `GET /metrics` để lấy CPU/RAM/lưu lượng. Nếu sử dụng thêm `GET /observability` hoặc `GET /sns/status` trong một phiên bản giao diện, phải kiểm tra route đã tồn tại, integration đúng Lambda và JWT scope đọc trước khi bật tính năng. Đây là các phần mở rộng, không được tính là đã triển khai chỉ dựa vào cấu hình tám route.
 
-### Bước 3
+Trong DevTools → Network, kiểm tra URL đầy đủ, method, status code và response JSON. Lỗi 404 có thể do route hoặc stage sai; lỗi 401/403 liên quan xác thực hoặc scope, còn lỗi 500 cần xem CloudWatch Logs.
 
-CORS: Allowed origins, methods và headers phải khớp nơi chạy frontend.
 
-{{< photo src="workshop/aws-console/41-api-gateway-cors-localhost-5500.png" alt="CORS: Allowed origins, methods và headers phải khớp nơi chạy frontend." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
-### Bước 4
-
-Stages → $default: kiểm tra Auto-deploy; nếu tắt, triển khai lại sau khi sửa cấu hình.
-
-{{< photo src="workshop/aws-console/42-api-gateway-default-stage-auto-deploy.png" alt="Stages → $default: kiểm tra Auto-deploy; nếu tắt, triển khai lại sau khi sửa cấu hình." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)

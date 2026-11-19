@@ -1,73 +1,79 @@
 +++
-title = "5.5.2. Triển khai Lambda netmon-api"
+title = "5.5.2. Viết Lambda netmon-api bằng Python"
 weight = 2
-translationKey = "ws-4-2"
+translationKey = "ws-shared-5-5-2-lambda-api"
 +++
 
-## Các hàm trong mã nguồn
+## Mục tiêu
 
-| Hàm | Nhiệm vụ |
-|---|---|
-| netmon-api | CRUD, metrics, cảnh báo, cấu hình, nhật ký và kiểm tra SNS |
-| netmon-simulator | Cập nhật CPU/RAM mô phỏng theo chu kỳ |
-| netmon-device-monitor | Phân tích thay đổi thiết bị, ghi cảnh báo và gửi SNS |
-| netmon-audit-writer | Ghi lại INSERT/MODIFY/REMOVE từ Streams |
+Dùng một Lambda Python `netmon-api` để xử lý 8 chức năng HTTP theo phương thức và đường dẫn request, giảm nhu cầu tạo nhiều Lambda nhỏ cho đồ án.
 
-## Các bước thực hiện
+## Các bước
 
-1. Tạo Lambda Python hoặc dùng hàm nhóm đã có. Từ `AWS_BACKEND_CODE`, dùng `netmon-api-deploy.zip` và `netmon-simulator-deploy.zip` đúng hàm; hai file monitor/audit writer được đóng gói riêng nếu cần. Kiểm tra handler `lambda_function.lambda_handler` tương ứng với tên file trong gói.
-2. Tạo execution role có quyền ghi CloudWatch Logs và quyền đúng bảng, metric, stream hoặc SNS cần dùng. Các file IAM trong mã nguồn là mẫu, phải đối chiếu ARN trước khi áp dụng.
-3. Cấu hình biến môi trường phù hợp: `DEVICES_TABLE`, `ALERTS_TABLE`, `SETTINGS_TABLE`, `AUDIT_LOGS_TABLE`, `SNS_TOPIC_ARN` và `CORS_ORIGIN` cho hàm cần chúng.
-4. Với simulator và hai hàm xử lý stream, thực hiện cấu hình trigger ở mục 5.4.3 và 5.4.4 sau khi các bảng đã sẵn sàng. Không tạo trigger/lịch trùng.
-5. Test API GET trong Lambda với event sau. Chỉ test vùng/lab có quyền.
+1. Vào **Lambda → Functions → Create function → Author from scratch**; đặt tên `netmon-api`, Runtime Python được AWS hỗ trợ.
+
+{{< netmonimg src="images/netmon-workshop/34-lambda-netmon-api-code-and-api-gateway.png" alt="Hàm netmon-api và kết nối API Gateway" caption="Ảnh 34 – Hàm netmon-api và kết nối API Gateway" >}}
+
+2. Gắn **execution role** cho phép thao tác với hai bảng DynamoDB và `cloudwatch:GetMetricStatistics`, cùng CloudWatch Logs. Nên chỉ định ARN tài nguyên cụ thể cho quyền DynamoDB.
+
+{{< netmonimg src="images/netmon-workshop/53-lambda-netmon-api-execution-role-permissions.png" alt="Execution role của Lambda netmon-api" caption="Ảnh 53 – Execution role của Lambda netmon-api" >}}
+
+{{< netmonimg src="images/netmon-workshop/54-iam-netmon-api-role-permission-policies.png" alt="Danh sách IAM policies của role" caption="Ảnh 54 – Danh sách IAM policies của role" >}}
+
+{{< netmonimg src="images/netmon-workshop/55-iam-netmon-api-access-policy-json.png" alt="JSON chính sách quyền DynamoDB và CloudWatch" caption="Ảnh 55 – JSON chính sách quyền DynamoDB và CloudWatch" >}}
+
+3. Trong mã nguồn, đọc phương thức từ `event.requestContext.http.method` và đường dẫn `event.rawPath` của **HTTP API payload format 2.0**.
+
+4. Sử dụng `boto3.resource('dynamodb')`, kiểm tra dữ liệu đầu vào và trả JSON `statusCode`, `headers`, `body`.
+5. Bấm **Deploy** mã nguồn. Vào tab **Test**, tạo sự kiện GET `/devices` theo mẫu:
+
+{{< netmonimg src="images/netmon-workshop/35-lambda-netmon-api-test-succeeded-details-collapsed.png" alt="Kết quả chạy Lambda (chưa mở Details)" caption="Ảnh 35 – Kết quả chạy Lambda (chưa mở Details)" >}}
 
 ```json
-{"requestContext":{"http":{"method":"GET"}},"rawPath":"/devices"}
+{
+  "version": "2.0",
+  "rawPath": "/devices",
+  "requestContext": {"http": {"method": "GET", "path": "/devices"}}
+}
 ```
 
-## Đối chiếu quyền theo chức năng
+6. Bấm **Test**; kiểm tra `statusCode` và dữ liệu trả về. Các chức năng POST, PUT, DELETE phải được kiểm thử riêng, ưu tiên thiết bị có `deviceId` bắt đầu bằng `TEST-`.
 
-| Hàm | Quyền nghiệp vụ cần rà |
-|---|---|
-| netmon-api | CRUD trên các bảng cần dùng; đọc CloudWatch, SNS status |
-| netmon-simulator | Scan/UpdateItem NetworkDevices, GetItem NetworkSettings |
-| netmon-device-monitor | Đọc Streams và settings, cập nhật cờ trên Devices, ghi Alerts, SNS Publish |
-| netmon-audit-writer | Đọc Streams, ghi NetworkAuditLogs |
+{{< netmonimg src="images/netmon-workshop/36-cloudwatch-logs-netmon-api-6-streams.png" alt="CloudWatch log streams của netmon-api" caption="Ảnh 36 – CloudWatch log streams của netmon-api" >}}
 
-Mỗi hàm cần quyền ghi CloudWatch Logs. Không áp policy mẫu với ARN chưa xác minh. 
+{{< netmonimg src="images/netmon-workshop/37-lambda-netmon-api-get-devices-test-200.png" alt="GET /devices trả về HTTP 200 và dữ liệu thiết bị" caption="Ảnh 37 – GET /devices trả về HTTP 200 và dữ liệu thiết bị" >}}
 
-## Kiểm tra
+## Lưu ý kết quả thực tế
 
-Kỳ vọng statusCode 200, body JSON và không có lỗi permission trong Logs. Với simulator, dùng thiết bị thử riêng; không ép dữ liệu EC2 thật. [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) · [EventBridge Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html).
+Trong quá trình thực hiện, nhóm đã nhận được phản hồi `statusCode: 200` từ một sự kiện test Lambda. Điều này xác nhận hàm xử lý được sự kiện thử, **chưa chứng minh toàn bộ 8 API Routes đã được kiểm thử từ trình duyệt**.
 
-## Biến môi trường và gói triển khai
+## Lỗi thường gặp
 
-| Biến | Giá trị mẫu |
-|---|---|
-| DEVICES_TABLE | NetworkDevices |
-| ALERTS_TABLE | NetworkAlerts |
-| SETTINGS_TABLE | NetworkSettings |
-| AUDIT_LOGS_TABLE | NetworkAuditLogs |
-| CORS_ORIGIN | http://localhost:5500 |
-| SNS_TOPIC_ARN | ARN topic của môi trường riêng (không công khai) |
+- `AccessDeniedException`: role chưa đủ quyền DynamoDB.
+- `KeyError` hoặc `None`: payload từ API Gateway khác test event; kiểm tra `rawPath`, `pathParameters`, `requestContext`.
+- `Internal server error`: mở **Monitor → View CloudWatch logs** và đọc stack trace.
 
-Chọn Lambda → Create function → Author from scratch, runtime Python được hỗ trợ, đúng execution role. Trong Code → Upload from → .zip file, chọn gói đúng hàm. Với mã `.py` monitor/audit, tạo gói ZIP chứa `lambda_function.py` ở gốc hoặc đặt handler đúng module. Trong Configuration → Environment variables điền giá trị phù hợp hàm. Save và Test ở 5.5.4, mở Monitor → View CloudWatch logs để tìm lỗi.
+## Cách backend NetMon xử lý dữ liệu
 
-Không upload lại hàm AWS đang chạy chỉ vì giao diện thay đổi. Không chèn khóa AWS vào ZIP/mã nguồn.
+- `GET /devices`: đọc danh sách DynamoDB; xử lý `LastEvaluatedKey` nếu Scan có nhiều trang.
+- `POST /devices`: kiểm tra mã/tên, lưu vị trí và nguồn dữ liệu; với thiết bị mô phỏng có thể sinh CPU/RAM nếu chưa nhập. Không ghi đè thiết bị trùng ID ngoài ý muốn.
+- `PUT /devices/{id}`: cập nhật các trường cho phép và thời gian; không dùng dữ liệu mô phỏng ghi đè metric EC2. `DELETE` chỉ xóa mục đúng ID, `GET` chi tiết đối chiếu khóa.
+- `GET /metrics`: tổng hợp CPU/RAM mô phỏng hoặc số liệu CloudWatch theo `instanceId` và trả rõ nguồn; NetworkIn/NetworkOut có thể `null` đối với thiết bị mô phỏng.
+- `GET /alerts`, `PUT /alerts/{id}`: đọc và xử lý cảnh báo; kiểm tra giá trị `handlingStatus` được backend hỗ trợ.
 
-## Thao tác trên AWS Console và ảnh đối chiếu
+Trong bản backend tích hợp, header `X-Netmon-Build: netmon-integrated-v2` giúp đối chiếu bản Lambda đang chạy nếu header này vẫn được giữ. Không thay toàn bộ Lambda đang hoạt động chỉ để thêm dữ liệu; kiểm thử hàm mới hoặc thay đổi từng phần và giữ nguyên JWT/CORS.
 
-Các ảnh dưới đây lấy từ bộ báo cáo của cùng nhóm NetMon, ở thời điểm triển khai; không phải ảnh chụp mới. Tên tài nguyên và trạng thái hiện tại cần kiểm tra lại trên tài khoản AWS.
+Ví dụ test riêng cho chỉ số:
 
-### Bước 1
+```json
+{
+  "version": "2.0",
+  "rawPath": "/metrics",
+  "requestContext": {"http": {"method": "GET", "path": "/metrics"}}
+}
+```
 
-Lambda → netmon-api → Code: đối chiếu mã và trigger API Gateway.
+Xác nhận HTTP 200, trường nguồn và số liệu EC2; test event Console không đi qua JWT Authorizer nên vẫn cần kiểm tra với trình duyệt.
 
-{{< photo src="workshop/aws-console/34-lambda-netmon-api-code-and-api-gateway.png" alt="Lambda → netmon-api → Code: đối chiếu mã và trigger API Gateway." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
 
-### Bước 2
-
-Lambda → Monitor → View CloudWatch logs: kiểm tra log group /aws/lambda/netmon-api và log streams.
-
-{{< photo src="workshop/aws-console/36-cloudwatch-logs-netmon-api-6-streams.png" alt="Lambda → Monitor → View CloudWatch logs: kiểm tra log group /aws/lambda/netmon-api và log streams." caption="Ảnh đối chiếu cấu hình của nhóm." >}}
-
+[← Về chương](../)

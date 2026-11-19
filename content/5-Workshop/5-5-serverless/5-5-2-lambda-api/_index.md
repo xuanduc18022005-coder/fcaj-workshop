@@ -1,73 +1,79 @@
 +++
-title = "5.5.2. Deploy the netmon-api Lambda"
+title = "5.5.2. Build the netmon-api Python Lambda"
 weight = 2
-translationKey = "ws-4-2"
+translationKey = "ws-shared-5-5-2-lambda-api"
 +++
 
-## Functions in the source
+## Objective
 
-| Function | Responsibility |
-|---|---|
-| netmon-api | CRUD, metrics, alerts, settings, logs and SNS status |
-| netmon-simulator | Periodic simulated CPU/RAM updates |
-| netmon-device-monitor | Analyze device changes, write alerts and send SNS |
-| netmon-audit-writer | Record stream INSERT/MODIFY/REMOVE events |
+Use a single Python Lambda named `netmon-api` to serve eight HTTP operations based on the request method and path, avoiding unnecessary duplicate functions for the class project.
 
 ## Steps
 
-1. Create Python Lambda functions or reuse existing ones. Deploy the matching `netmon-api-deploy.zip` and `netmon-simulator-deploy.zip` from AWS_BACKEND_CODE. Package monitor/audit writer separately if needed. Check that handler `lambda_function.lambda_handler` matches the packaged module.
-2. Create execution roles for CloudWatch Logs and only the required tables, metrics, streams or SNS. Source IAM policies are examples: verify ARNs first.
-3. Configure relevant environment variables: `DEVICES_TABLE`, `ALERTS_TABLE`, `SETTINGS_TABLE`, `AUDIT_LOGS_TABLE`, `SNS_TOPIC_ARN` and `CORS_ORIGIN`.
-4. Configure the simulator and stream processors in 5.4.3 and 5.4.4 once the tables exist. Do not create duplicate triggers or schedules.
-5. Test the API GET in Lambda using this event in an authorized lab.
+1. Open **Lambda → Functions → Create function → Author from scratch**. Name the function `netmon-api` and select a supported Python runtime.
+
+{{< netmonimg src="images/netmon-workshop/34-lambda-netmon-api-code-and-api-gateway.png" alt="netmon-api Lambda and API Gateway trigger" caption="Figure 34 – netmon-api Lambda and API Gateway trigger" >}}
+
+2. Attach an **execution role** with access to both DynamoDB tables, `cloudwatch:GetMetricStatistics`, and CloudWatch Logs. Prefer resource-scoped DynamoDB permissions.
+
+{{< netmonimg src="images/netmon-workshop/53-lambda-netmon-api-execution-role-permissions.png" alt="Lambda netmon-api execution role" caption="Figure 53 – Lambda netmon-api execution role" >}}
+
+{{< netmonimg src="images/netmon-workshop/54-iam-netmon-api-role-permission-policies.png" alt="IAM role permission policies" caption="Figure 54 – IAM role permission policies" >}}
+
+{{< netmonimg src="images/netmon-workshop/55-iam-netmon-api-access-policy-json.png" alt="JSON policy granting DynamoDB and CloudWatch actions" caption="Figure 55 – JSON policy granting DynamoDB and CloudWatch actions" >}}
+
+3. In code, read the method from `event.requestContext.http.method` and the URL from `event.rawPath` for **HTTP API payload format 2.0**.
+
+4. Use `boto3.resource('dynamodb')`, validate incoming data, and return JSON through `statusCode`, `headers`, and `body`.
+5. Click **Deploy**. Under **Test**, create a GET `/devices` event:
+
+{{< netmonimg src="images/netmon-workshop/35-lambda-netmon-api-test-succeeded-details-collapsed.png" alt="Lambda execution result (details collapsed)" caption="Figure 35 – Lambda execution result (details collapsed)" >}}
 
 ```json
-{"requestContext":{"http":{"method":"GET"}},"rawPath":"/devices"}
+{
+  "version": "2.0",
+  "rawPath": "/devices",
+  "requestContext": {"http": {"method": "GET", "path": "/devices"}}
+}
 ```
 
-## Review permissions by function
+6. Select **Test** and review the `statusCode` and response body. Test POST, PUT, and DELETE separately, preferably using devices whose IDs begin with `TEST-`.
 
-| Function | Required business permissions to review |
-|---|---|
-| netmon-api | Required table CRUD; CloudWatch and SNS status reads |
-| netmon-simulator | Scan/UpdateItem NetworkDevices, GetItem NetworkSettings |
-| netmon-device-monitor | Stream/settings reads, device flags, alert writes and SNS Publish |
-| netmon-audit-writer | Stream reads and NetworkAuditLogs writes |
+{{< netmonimg src="images/netmon-workshop/36-cloudwatch-logs-netmon-api-6-streams.png" alt="netmon-api CloudWatch log streams" caption="Figure 36 – netmon-api CloudWatch log streams" >}}
 
-Each function needs CloudWatch Logs permissions. Do not apply sample policies with unverified ARNs.
+{{< netmonimg src="images/netmon-workshop/37-lambda-netmon-api-get-devices-test-200.png" alt="GET /devices returned HTTP 200 and device data" caption="Figure 37 – GET /devices returned HTTP 200 and device data" >}}
 
-## Verification
+## What has been verified
 
-Expect statusCode 200, a JSON body and no permission error in Logs. Use a separate test device for simulation; never force actual EC2 readings. [AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/welcome.html) · [EventBridge Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html).
+The team previously received `statusCode: 200` from a Lambda test event. That proves a test invocation was handled; it **does not prove that all eight routes were successfully tested end to end from a browser**.
 
-## Environment and deployment packages
+## Common issues
 
-| Variable | Example |
-|---|---|
-| DEVICES_TABLE | NetworkDevices |
-| ALERTS_TABLE | NetworkAlerts |
-| SETTINGS_TABLE | NetworkSettings |
-| AUDIT_LOGS_TABLE | NetworkAuditLogs |
-| CORS_ORIGIN | http://localhost:5500 |
-| SNS_TOPIC_ARN | private environment topic ARN |
+- `AccessDeniedException`: the execution role lacks DynamoDB permissions.
+- `KeyError` or `None`: API Gateway payload differs from the test event; inspect `rawPath`, `pathParameters`, and `requestContext`.
+- `Internal server error`: check the stack trace under **Monitor → View CloudWatch logs**.
 
-Create a Lambda with a supported Python runtime and approved role. Under Code → Upload from → .zip file, upload the corresponding package. For the monitor/audit Python files, package as root-level `lambda_function.py` or configure the correct module handler. Set the relevant environment variables, save and use the tests in 5.5.4. Inspect Monitor → View CloudWatch logs on errors.
+## How the NetMon backend processes data
 
-Do not redeploy a working function solely because the UI changed. Never embed AWS credentials in packages.
+- `GET /devices`: read DynamoDB; follow `LastEvaluatedKey` if Scan spans multiple pages.
+- `POST /devices`: validate ID/name, store location and source; simulated devices may generate missing CPU/memory values. Avoid unintended duplicate-ID overwrites.
+- `PUT /devices/{id}`: update allowed fields and timestamp; do not overwrite EC2 metrics with simulated values. `DELETE` removes only the matching ID; detail `GET` reads the key.
+- `GET /metrics`: aggregate simulated CPU/memory or CloudWatch values using `instanceId`, with an explicit source; NetworkIn/NetworkOut can be `null` for simulated devices.
+- `GET /alerts`, `PUT /alerts/{id}`: read and handle alerts; check accepted `handlingStatus` values.
 
-## AWS Console walkthrough and evidence
+In the integrated backend, `X-Netmon-Build: netmon-integrated-v2` helps identify the running Lambda version if the header is retained. Do not replace an otherwise working Lambda just to add metrics; test changes separately and preserve JWT/CORS behavior.
 
-The following screenshots come from the same NetMon team’s project report at the time of implementation; they are not newly captured. Verify resource names and current state in AWS.
+Example metric test:
 
-### Step 1
+```json
+{
+  "version": "2.0",
+  "rawPath": "/metrics",
+  "requestContext": {"http": {"method": "GET", "path": "/metrics"}}
+}
+```
 
-Lambda → netmon-api → Code: compare function code and the API Gateway trigger.
+Verify HTTP 200, the source field, and EC2 values. A Console test bypasses the JWT authorizer, so browser testing is still required.
 
-{{< photo src="workshop/aws-console/34-lambda-netmon-api-code-and-api-gateway.png" alt="Lambda → netmon-api → Code: compare function code and the API Gateway trigger." caption="Configuration evidence from the team." >}}
 
-### Step 2
-
-Lambda → Monitor → View CloudWatch logs: inspect /aws/lambda/netmon-api and log streams.
-
-{{< photo src="workshop/aws-console/36-cloudwatch-logs-netmon-api-6-streams.png" alt="Lambda → Monitor → View CloudWatch logs: inspect /aws/lambda/netmon-api and log streams." caption="Configuration evidence from the team." >}}
-
+[← Back to chapter](../)
