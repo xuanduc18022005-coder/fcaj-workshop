@@ -29,11 +29,11 @@
       <button id="clear-history" type="button" title="{{ if eq .Language.Lang "vi" }}Xóa dấu đã xem trên website này{{ else }}Clear visited-page markers on this site{{ end }}">↶ {{ if eq .Language.Lang "vi" }}Xóa lịch sử{{ else }}Clear History{{ end }}</button>
       <div class="sidebar-meta">
         <div class="site-meta-block">
-          <small>{{ if eq .Language.Lang "vi" }}Cập nhật lần cuối{{ else }}Last Updated{{ end }}</small>
+          <small>Last Updated</small>
           <strong>{{ with .Site.Params.lastupdated }}{{ . }}{{ else }}[DD-MM-YYYY]{{ end }}</strong>
         </div>
         <div class="site-meta-block">
-          <small>{{ if eq .Language.Lang "vi" }}Nhóm{{ else }}Team{{ end }}</small>
+          <small>Team</small>
           {{ with .Site.Params.teamurl }}<a href="{{ . | safeURL }}" target="_blank" rel="noopener noreferrer">{{ $.Site.Params.team }}</a>{{ else }}<strong>{{ .Site.Params.team }}</strong>{{ end }}
         </div>
       </div>
