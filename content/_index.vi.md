@@ -12,13 +12,13 @@ translationKey = "home"
 
 **Email:** [xuanduc18022005@gmail.com](mailto:xuanduc18022005@gmail.com)
 
-**Trường:** Học viện Nông nghiệp Việt Nam (Vietnam National University of Agriculture)
+**Trường:** Học viện Nông nghiệp Việt Nam
 
 **Ngành học:** Công nghệ thông tin
 
 **Lớp:** K68CNTTF
 
-**Đơn vị thực tập:** Amazon Web Services Viet Nam Company Limited
+**Đơn vị thực tập:** Công ty TNHH Amazon Web Services Việt Nam
 
 **Vị trí thực tập:** Workforce Bootcamp - First Cloud AI Journey
 

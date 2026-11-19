@@ -18,7 +18,7 @@ Dưới đây là nhật ký công việc chi tiết tổng hợp quá trình th
 
 **Tuần 5:** [Tìm hiểu AI Agent, kiểm soát phạm vi hoạt động và đánh giá tài nguyên AWS (Prove It Day 01)](./1.5-week5/)
 
-**Tuần 6:** [Tìm hiểu Kubernetes và điều tra sự cố bằng AI Agent (Prove It Day 02)](./1.6-week6/)
+**Tuần 6:** [Tìm hiểu Kubernetes và điều tra sự cố với sự hỗ trợ của AI (Prove It Day 02)](./1.6-week6/)
 
 **Tuần 7:** [Lập kế hoạch nhóm, phân tích yêu cầu và thiết kế hệ thống giám sát mạng](./1.7-week7/)
 
@@ -28,6 +28,6 @@ Dưới đây là nhật ký công việc chi tiết tổng hợp quá trình th
 
 **Tuần 10:** [Tìm hiểu và triển khai CloudWatch, SNS và quản lý cảnh báo](./1.10-week10/)
 
-**Tuần 11:** [Tích hợp giao diện, kiểm thử và hoàn thiện hệ thống](./1.11-week11/)
+**Tuần 11:** [Tích hợp giao diện, kiểm thử và hoàn thiện dần hệ thống](./1.11-week11/)
 
 **Tuần 12:** [Hoàn thành dự án và chuẩn bị báo cáo, demo](./1.12-week12/)

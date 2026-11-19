@@ -29,7 +29,7 @@ NetMon là hệ thống quản lý và giám sát hạ tầng mạng doanh nghi�
 
 **Luồng mô phỏng:** Router, Switch và các thiết bị không có collector thực được quản lý dưới dạng dữ liệu mô phỏng. CPU/RAM và trạng thái thay đổi theo cơ chế mô phỏng; việc tạo cảnh báo tự động và gửi SNS phụ thuộc vào hàm giám sát và lịch kích hoạt đã triển khai. Không coi dữ liệu mô phỏng là số liệu đo từ thiết bị vật lý.
 
-## Mục tiêu sau workshop
+## Kết quả hướng tới sau workshop
 
 - Quản lý thiết bị bằng CRUD, tìm kiếm và xem chi tiết.
 - Theo dõi CPU/RAM, lưu lượng EC2 và phân biệt nguồn dữ liệu thực với mô phỏng.
@@ -67,7 +67,7 @@ NetMon là hệ thống quản lý và giám sát hạ tầng mạng doanh nghi�
    - [5.6.1. Tạo Cognito User Pool và Web Client](5-6-auth-frontend/5-6-1-cognito/)
    - [5.6.2. Tạo JWT Authorizer và OAuth Scopes](5-6-auth-frontend/5-6-2-jwt/)
    - [5.6.3. Xây dựng trang kiểm thử trên VS Code](5-6-auth-frontend/5-6-3-test-ui/)
-   - [5.6.4. Đăng nhập bằng PKCE và gọi API bảo vệ](5-6-auth-frontend/5-6-4-frontend-login/)
+   - [5.6.4. Đăng nhập bằng PKCE và gọi API được bảo vệ](5-6-auth-frontend/5-6-4-frontend-login/)
    - [5.6.5. Vận hành giao diện quản lý NetMon](5-6-auth-frontend/5-6-5-netmon-interface/)
 
 7. [5.7. Kiểm thử tổng thể và dọn dẹp tài nguyên](5-7-testing-cleanup/)

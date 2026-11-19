@@ -1,5 +1,5 @@
 baseURL = "http://localhost:1313/"
-title = "Internship Report - Tran Xuan Duc"
+title = "Internship Report - Trần Xuân Đức"
 defaultContentLanguage = "en"
 defaultContentLanguageInSubdir = true
 # VI/EN nam chung thu muc content; _index.md = EN, _index.vi.md = VI
@@ -14,7 +14,7 @@ summaryLength = 40
   # PHAN CUOI MENU: doi gia tri o day de trang hien ten nhom va ngay cap nhat
   team = "First Cloud AI Journey"
   teamURL = "https://www.facebook.com/groups/660548818043427"
-  lastUpdated = "18-11-2026"
+  lastUpdated = "19-11-2026"
   # Anh chan dung tren trang chu; thay file trong static/images neu muon doi anh
   profilePhoto = "images/tran-xuan-duc.jpg"
 
@@ -36,7 +36,7 @@ summaryLength = 40
     label = "Tiếng Việt"
     weight = 1
   [languages.en]
-    title = "Internship Report - Tran Xuan Duc"
+    title = "Internship Report - Trần Xuân Đức"
     languageCode = "en-US"
     label = "English"
     weight = 2

@@ -1,4 +1,4 @@
-<aside class="sidebar" aria-label="Sidebar">
+<aside class="sidebar" aria-label="{{ if eq .Language.Lang "vi" }}Thanh bên{{ else }}Sidebar{{ end }}">
   <div class="sidebar-header">
     <a href="{{ .Site.Home.RelPermalink }}" class="aws-logo" aria-label="AWS FCJ - {{ if eq .Language.Lang "vi" }}Trang chủ{{ else }}Home{{ end }}"><img src="{{ "images/aws-logo-white.svg" | relURL }}" alt="AWS" width="106" height="72"></a>
     <div class="search-wrap">
@@ -9,12 +9,12 @@
     </div>
   </div>
   <div class="sidebar-scroller">
-    <nav id="site-nav" class="site-nav" aria-label="Menu">
+    <nav id="site-nav" class="site-nav" aria-label="{{ if eq .Language.Lang "vi" }}Mục lục{{ else }}Menu{{ end }}">
       <ul class="nav-tree">{{ $current := . }}{{ range .Site.Home.Sections.ByWeight }}{{ partial "nav-item.html" (dict "node" . "current" $current "level" 0) }}{{ end }}</ul>
     </nav>
     <div id="search-results" class="search-results" hidden></div>
     <section class="sidebar-more" aria-label="{{ if eq .Language.Lang "vi" }}Liên kết tham khảo{{ else }}Reference links{{ end }}">
-      <div class="more-title">More</div>
+      <div class="more-title">{{ if eq .Language.Lang "vi" }}Liên kết khác{{ else }}More{{ end }}</div>
       <a href="https://awsstudygroup.com/" target="_blank" rel="noopener noreferrer" title="AWS Study Group Blog"><span class="more-aws" aria-hidden="true">aws</span> AWS Study Group - Blog</a>
       <a href="https://www.facebook.com/groups/660548818043427" target="_blank" rel="noopener noreferrer" title="AWS Study Group Facebook"><span class="more-fb" aria-hidden="true">f</span> {{ if eq .Language.Lang "vi" }}AWS Study Group - Nhóm FB{{ else }}AWS Study Group - FB Group{{ end }}</a>
     </section>
@@ -26,14 +26,14 @@
           {{ range .AllTranslations }}<option value="{{ .RelPermalink }}"{{ if eq .Language.Lang $.Language.Lang }} selected{{ end }}>{{ if eq .Language.Lang "vi" }}Tiếng Việt{{ else }}English{{ end }}</option>{{ end }}
         </select>
       </div>
-      <button id="clear-history" type="button" title="{{ if eq .Language.Lang "vi" }}Xóa dấu đã xem trên website này{{ else }}Clear visited-page markers on this site{{ end }}">↶ Clear History</button>
+      <button id="clear-history" type="button" title="{{ if eq .Language.Lang "vi" }}Xóa dấu đã xem trên website này{{ else }}Clear visited-page markers on this site{{ end }}">↶ {{ if eq .Language.Lang "vi" }}Xóa lịch sử{{ else }}Clear History{{ end }}</button>
       <div class="sidebar-meta">
         <div class="site-meta-block">
-          <small>Last Updated</small>
+          <small>{{ if eq .Language.Lang "vi" }}Cập nhật lần cuối{{ else }}Last Updated{{ end }}</small>
           <strong>{{ with .Site.Params.lastupdated }}{{ . }}{{ else }}[DD-MM-YYYY]{{ end }}</strong>
         </div>
         <div class="site-meta-block">
-          <small>Team</small>
+          <small>{{ if eq .Language.Lang "vi" }}Nhóm{{ else }}Team{{ end }}</small>
           {{ with .Site.Params.teamurl }}<a href="{{ . | safeURL }}" target="_blank" rel="noopener noreferrer">{{ $.Site.Params.team }}</a>{{ else }}<strong>{{ .Site.Params.team }}</strong>{{ end }}
         </div>
       </div>

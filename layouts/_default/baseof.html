@@ -12,7 +12,7 @@
   {{ partial "sidebar.html" . }}
   <div class="layout-main">
     <header class="topbar">
-      <button type="button" class="mobile-toggle" aria-label="Mở menu" aria-expanded="false">☰</button>
+      <button type="button" class="mobile-toggle" aria-label="{{ if eq .Language.Lang "vi" }}Mở menu{{ else }}Open menu{{ end }}" aria-expanded="false">☰</button>
       {{ if not .IsHome }}
       <div class="breadcrumbs">
         {{ $toc := .TableOfContents }}
@@ -40,7 +40,7 @@
   <button type="button" id="back-to-top" title="{{ if eq .Language.Lang "vi" }}Lên đầu trang{{ else }}Back to top{{ end }}" aria-label="{{ if eq .Language.Lang "vi" }}Lên đầu trang{{ else }}Back to top{{ end }}">↑</button>
   <div class="tool-toast" id="tool-toast" role="status" aria-live="polite"></div>
   <dialog id="image-lightbox" class="image-lightbox" aria-label="{{ if eq .Language.Lang "vi" }}Xem ảnh lớn{{ else }}Image preview{{ end }}">
-    <button type="button" class="lightbox-close" aria-label="Close">×</button><img alt=""><p></p>
+    <button type="button" class="lightbox-close" aria-label="{{ if eq .Language.Lang "vi" }}Đóng{{ else }}Close{{ end }}">×</button><img alt=""><p></p>
   </dialog>
   <script defer src="{{ "js/site.js" | relURL }}"></script>
 </body>

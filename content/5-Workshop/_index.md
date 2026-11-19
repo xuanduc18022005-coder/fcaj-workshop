@@ -25,7 +25,7 @@ NetMon is an SME network infrastructure management and monitoring system on AWS,
 
 **Management flow:** The browser authenticates with Cognito, then sends its JWT to API Gateway → Lambda → DynamoDB. Lambda also reads CloudWatch when retrieving EC2 metrics.
 
-**EC2 monitoring flow:** EC2/CloudWatch Agent → CloudWatch → Alarm. The alarm sends notifications to SNS; state-change events are separately routed by EventBridge to Lambda for persistence in DynamoDB.
+**EC2 monitoring flow:** EC2/CloudWatch Agent → CloudWatch → Alarm. The alarm sends notifications to SNS; state-change events are separately routed by EventBridge to Lambda for persistence in DynamoDB. These two paths operate independently.
 
 **Simulation flow:** Routers, switches, and devices without live collectors are represented by simulated data. CPU, memory, and status change according to simulation logic; automatic alert generation and SNS delivery depend on the deployed monitor and trigger schedule. Simulated values are not physical-device measurements.
 
