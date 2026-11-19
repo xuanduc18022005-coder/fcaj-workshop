@@ -6,7 +6,7 @@ translationKey = "home"
 
 ## Thông tin sinh viên:
 
-**Họ và tên:** Tran Xuan Duc
+**Họ và tên:** Trần Xuân Đức
 
 **Số điện thoại:** [0345305418](tel:+84345305418)
 
